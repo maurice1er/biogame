@@ -33,7 +33,7 @@ paths:
           schema:
             $ref: '#/definitions/Question'
       responses:
-        200:
+        201:
           description: Success
 
   /questions/{question_id}:
@@ -79,6 +79,11 @@ paths:
           description: Success
 
   /participants:
+    get:
+      summary: Get all participants
+      responses:
+        200:
+          description: Success
     post:
       summary: Create a new participant
       parameters:
@@ -88,7 +93,7 @@ paths:
           schema:
             $ref: '#/definitions/Participant'
       responses:
-        200:
+        201:
           description: Success
 
   /participants/{participant_id}:
@@ -132,6 +137,38 @@ paths:
       responses:
         200:
           description: Success
+  
+  /challenges:
+    get:
+      summary: Get all challenges
+      responses:
+        200:
+          description: Success
+
+    post:
+      summary: Create a new challenge
+      parameters:
+        - in: body
+          name: challenge
+          description: Challenge object
+          schema:
+            $ref: '#/definitions/Challenge'
+      responses:
+        201:
+          description: Success
+
+  /challenges/{challenge_id}:
+    get:
+      summary: Get a specific challenge
+      parameters:
+        - in: path
+          name: challenge_id
+          type: string
+          required: true
+          description: ID of the challenge
+      responses:
+        200:
+          description: Success
 
 definitions:
   Question:
@@ -155,3 +192,38 @@ definitions:
       name:
         type: string
         description: The participant's name
+
+  Challenge:
+    type: object
+    properties:
+      challenger:
+        type: string
+        description: The challenger's name
+      challenged:
+        type: string
+        description: The challenged's name
+      winner:
+        type: string
+        description: The winner's name
+      is_started:
+        type: boolean
+        default: false
+        description: The challenge is started
+      is_ended:
+        type: boolean
+        default: false
+        description: The challenge is ended
+      launched_date:
+        type: string 
+        format: date-time
+        description: The launched date
+      started_date:
+        type: string 
+        format: date-time
+        default: null
+        description: The started date
+      ended_date:
+        type: string 
+        format: date-time
+        default: null
+        description: The ended date
