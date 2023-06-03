@@ -54,3 +54,13 @@ class Challenge(Document):
     meta = {
         'collection': 'challenges'
     }
+
+
+class Score(Document):
+    participant = ReferenceField('Participant', required=True)
+    challenge = ReferenceField('Challenge', required=True)
+    score = IntField(default=0)
+
+    meta = {
+        'collection': 'scores'
+    }

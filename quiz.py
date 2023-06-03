@@ -9,6 +9,7 @@ from pymongo.errors import AutoReconnect
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 from mongoengine import Q
+import mongoengine
 
 from datetime import datetime, timedelta
 import time
@@ -18,27 +19,19 @@ from models import Question, Participant, Challenge
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'your-secret-key'
-app.config['MONGODB_SETTINGS'] = {
-    'db': 'quiz_db',
-    'host': 'mongodb://localhost',
-    'port': 27017
-}
+# app.config['MONGODB_SETTINGS'] = {
+#     'db': 'quiz_db',
+#     'host': 'mongodb://localhost',
+#     'port': 27017
+# }
 
-db = None
-max_retries = 3
-retry_interval = 2
-
-for attempt in range(max_retries):
-    try:
-        connect(db='quiz_db', host='localhost', port=27017)
-        break  # Connexion réussie, sortir de la boucle
-    except AutoReconnect:
-        if attempt < max_retries - 1:
-            print(
-                f"La tentative de connexion a échoué. Retrying in {retry_interval} seconds...")
-            time.sleep(retry_interval)
-        else:
-            print("La tentative de connexion a échoué après plusieurs essais.")
+mongoengine.connect(
+    db='quiz_db',
+    host='localhost',
+    port=27017,
+    username='',
+    password='',
+)
 
 
 # Chemin vers le fichier YAML de spécification Swagger
@@ -66,20 +59,6 @@ app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 socketio = SocketIO(app)
 
-
-def serialize_objectid(obj):
-    if isinstance(obj, ObjectId):
-        return str(obj)
-    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
-
-
-# Génération aléatoire de questions pour chaque défi
-
-
-def generate_challenge_questions(num_questions):
-    questions = list(Question.objects())
-    random.shuffle(questions)
-    return questions[:num_questions]
 
 # Routes pour les questions
 
