@@ -1,6 +1,6 @@
 import mongoengine
 import time
-from models import Question, Challenge, Score
+from models import Question, Challenge, Score, Participant
 
 # Définir la configuration de connexion à MongoDB
 mongoengine.connect(
@@ -108,13 +108,42 @@ questions_list = [
 Question.objects.delete()
 Challenge.objects.delete()
 Score.objects.delete()
+Participant.objects.delete()
+
 
 # Insérer les questions dans la collection
+print("Question")
 for question_data in questions_list:
     question = Question(**question_data)
     question.created_by = "cf9e6aa4-d879-422d-b26d-8fac11cde5bf"
     question.save()
     time.sleep(1)
     print(question.id)
+
+
+participants = [
+    {
+        "id": "6e01900e-4afd-48b7-95a1-513f0e50aeb4",
+        "is_denied": False,
+        "is_blocked": False
+    },
+    {
+        "id": "6e01900e-4afd-48b7-95a1-513f0e50aeb5",
+        "is_denied": False,
+        "is_blocked": False
+    },
+    {
+        "id": "6e01900e-4afd-48b7-95a1-513f0e50aeb6",
+        "is_denied": False,
+        "is_blocked": False
+    }
+]
+
+print("Participants")
+for participant_data in participants:
+    participant = Participant(**participant_data)
+    participant.save()
+    time.sleep(1)
+    print(participant.id)
 
 print("Les questions ont été insérées avec succès.")
