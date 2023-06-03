@@ -26,6 +26,8 @@ class Question(Document):
 
 class Participant(Document):
     id = StringField(primary_key=True)
+    is_blocked = BooleanField(default=False)
+    is_denied = BooleanField(default=False)
 
     meta = {
         'collection': 'participants'

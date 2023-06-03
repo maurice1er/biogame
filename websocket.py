@@ -62,8 +62,12 @@ class QuizGameServer:
         p_req = requests.get(p_url)
 
         if p_req.status_code != 200:
-            await self.send_message(websocket, "Erreur : le participant n'existe pas")
-            return
+            # create participant
+            p_create_url = f"http://127.0.0.1:5000/api/participants"
+            requests.post(p_create_url, json={"id": participant_id})
+            await self.send_message(websocket, "Le participant a été crée avec succès")
+            print({"_id": participant_id})
+            # return
         else:
             print(p_req.json())
 
@@ -139,8 +143,14 @@ class QuizGameServer:
         p_req = requests.get(p_url)
 
         if p_req.status_code != 200:
-            await self.send_message(websocket, "Erreur : le participant n'existe pas")
-            return
+            # create participant
+            p_create_url = f"http://127.0.0.1:5000/api/participants"
+            requests.post(p_create_url, json={"id": participant_id})
+            await self.send_message(websocket, "Le participant a été crée avec succès")
+            print({"_id": participant_id})
+
+            # await self.send_message(websocket, "Erreur : le participant n'existe pas")
+            # return
 
         # # Instanciation du participant challenger
         # challenger = Participant.objects.get(id=participant_id)
