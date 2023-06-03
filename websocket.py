@@ -3,11 +3,18 @@ import websockets
 import random
 import uuid
 import requests
+import os
 
 from models import *
 
 import mongoengine
 
+
+# Temps de rafraîchissement des top participants (en secondes)
+TOP_PARTICPANT_REFRESH_TIME = int(os.environ.get('TOP_REFRESH_TIME', 10))
+
+# Temps d'attente avant l'envoi du message aux participants (en secondes)
+TOP_PARTICPANT_MESSAGE_WAIT_TIME = int(os.environ.get('MESSAGE_WAIT_TIME', 15))
 
 # Définir la configuration de connexion à MongoDB
 mongoengine.connect(
@@ -118,7 +125,7 @@ class QuizGameServer:
         finally:
             await self.send_message(websocket, f"Jeu  terminé")
             await self.handle_disconnect(participant_id)
-            await self.emit_top_participants(websocket)
+            await self.emit_top_participants(websocket, path)
 
     async def handle_client_accept(self, websocket, path):
         # Demande d'identification du participant
@@ -178,13 +185,6 @@ class QuizGameServer:
         # Instanciation du participant défié
         challenged = Participant.objects.get(id=participant_id)
 
-        # Récupération des questions du défi
-        questions_url = f"http://127.0.0.1:5000/api/challenges/{chosen_challenge['_id']}/questions"
-        questions_req = requests.get(questions_url)
-
-        if questions_req.status_code == 200:
-            self.challenge_questions = questions_req.json()
-
         challenge = Challenge.objects.get(id=chosen_challenge['_id'])
         challenge.challenged = challenged
         challenge.accepted_date = f'{datetime.utcnow()}'
@@ -240,7 +240,7 @@ class QuizGameServer:
 
             await self.send_message(websocket, f"Jeu terminé")
             await self.handle_disconnect(participant_id)
-            await self.emit_top_participants(websocket)
+            await self.emit_top_participants(websocket, path)
 
     async def emit_top_participants(self, websocket, path):
         # # Récupérer les 10 meilleurs participants en fonction de leur score
@@ -250,7 +250,7 @@ class QuizGameServer:
             while True:
                 top_participants = {'top_participants': self.top_participants}
                 await self.send_message(websocket, f"{top_participants}")
-                await asyncio.sleep(6)
+                await asyncio.sleep(TOP_PARTICPANT_MESSAGE_WAIT_TIME)
 
     def update_top_participants(self):
         # Requête pour regrouper par participant et filtrer par score
@@ -362,7 +362,7 @@ class QuizGameServer:
     async def refresh_top_participants(self):
         while True:
             self.update_top_participants()
-            await asyncio.sleep(5)
+            await asyncio.sleep(TOP_PARTICPANT_REFRESH_TIME)
 
 
 # if __name__ == "__main__":
