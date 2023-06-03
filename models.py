@@ -8,6 +8,8 @@ class Question(Document):
     question = StringField(required=True)
     hint = StringField(required=False)
 
+    images = ListField(StringField(), required=False)
+
     options = ListField(StringField(), required=True)
     answer = StringField(required=True)
     duration = IntField(default=10)
