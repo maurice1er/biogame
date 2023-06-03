@@ -234,4 +234,5 @@ def update_challenge(challenge_id):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app)
+    # socketio.run(app, debug=True)

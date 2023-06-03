@@ -6,9 +6,11 @@ import uuid
 class Question(Document):
     id = StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     question = StringField(required=True)
+    hint = StringField(required=False)
+
     options = ListField(StringField(), required=True)
     answer = StringField(required=True)
-    duration = IntField(default=5)
+    duration = IntField(default=10)
 
     created_by = StringField(required=True)
 
@@ -57,9 +59,12 @@ class Challenge(Document):
 
 
 class Score(Document):
-    participant = ReferenceField('Participant', required=True)
+    id = StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     challenge = ReferenceField('Challenge', required=True)
+    participant = ReferenceField('Participant')
     score = IntField(default=0)
+
+    is_challenger = BooleanField(default=False)
 
     meta = {
         'collection': 'scores'

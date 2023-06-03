@@ -28,19 +28,27 @@ class QuizGameServer:
 
         self.chosen_challenge = None
 
+        self.top_participants = []
+
     # handle client
+
     async def handle_client(self, websocket, path):
         if path == "/accept":
             await self.handle_client_accept(websocket, path)
         elif path == "/launch":
             await self.handle_client_launch(websocket, path)
+        elif path == "/top":
+            await self.emit_top_participants(websocket, path)
         else:
-            await websocket.send("Chemin non valide")
+            # await websocket.send("Chemin non valide")
+            await self.send_message(websocket, "Chemin non valide")
 
     async def handle_client_launch(self, websocket, path):
         # Demande d'identification du participant
-        await websocket.send("Veuillez vous identifier :")
-        participant_id = await websocket.recv()
+        # await websocket.send("Veuillez vous identifier :")
+        await self.send_message(websocket, "Veuillez vous identifier :")
+        # participant_id = await websocket.recv()
+        participant_id = await self.receive_message(websocket)
 
         # Vérification si le participant existe
         p_url = f"http://127.0.0.1:5000/api/participants/{participant_id}"
@@ -77,6 +85,12 @@ class QuizGameServer:
             await self.send_message(websocket, f"{i}s")
             await asyncio.sleep(1)
 
+        score = Score()
+        score.challenge = Challenge.objects.get(id=challenge.id)
+        score.participant = challenger
+        score.is_challenger = True
+        score.save()
+
         try:
             for (idx, question) in enumerate(self.challenge_questions):
                 correct_answer = question['answer']
@@ -87,23 +101,31 @@ class QuizGameServer:
                 await self.send_question(websocket, f"{question_json}")
 
                 options_json = {"options": question['options']}
-
                 await self.send_message(websocket, f"{options_json}")
 
                 answer = await self.receive_message_with_timeout(websocket, duration)
 
                 is_correct = await self.check_answers(websocket, answer, correct_answer)
                 await self.process_score_launch(challenge, participant_id, is_correct)
-                await self.send_message(websocket, f"{idx+1}/{len(self.challenge_questions)} => score actuel : {self.get_participant_score_launch(challenge, participant_id)}")
+
+                participant_score = self.get_participant_score_launch(
+                    challenge, participant_id)
+                await self.send_message(websocket, f"{idx+1}/{len(self.challenge_questions)} => score actuel : {participant_score}")
+
+                score.score = participant_score
+                score.save()
 
         finally:
             await self.send_message(websocket, f"Jeu  terminé")
             await self.handle_disconnect(participant_id)
+            await self.emit_top_participants(websocket)
 
     async def handle_client_accept(self, websocket, path):
         # Demande d'identification du participant
-        await websocket.send("Veuillez vous identifier :")
-        participant_id = await websocket.recv()
+        # await websocket.send("Veuillez vous identifier :")
+        await self.send_message(websocket, "Veuillez vous identifier :")
+        # participant_id = await websocket.recv()
+        participant_id = await self.receive_message(websocket)
 
         # Vérification si le participant existe
         p_url = f"http://127.0.0.1:5000/api/participants/{participant_id}"
@@ -137,7 +159,8 @@ class QuizGameServer:
 
         # Réception du choix de défi de l'utilisateur
         await self.send_message(websocket, "Veuillez saisir l'ID du défi que vous souhaitez rejoindre :")
-        challenge_id = await websocket.recv()
+        # challenge_id = await websocket.recv()
+        challenge_id = await self.receive_message(websocket)
 
         # Recherche du défi choisi
         chosen_challenge = None
@@ -173,6 +196,12 @@ class QuizGameServer:
             await self.send_message(websocket, f"{i}s")
             await asyncio.sleep(1)
 
+        score = Score()
+        score.challenge = Challenge.objects.get(id=challenge.id)
+        score.participant = challenged
+        score.is_challenger = False
+        score.save()
+
         try:
             for (idx, question) in enumerate(self.challenge_questions):
                 correct_answer = question['answer']
@@ -184,7 +213,13 @@ class QuizGameServer:
 
                 is_correct = await self.check_answers(websocket, answer, correct_answer)
                 await self.process_score_accept(challenge, participant_id, is_correct)
-                await self.send_message(websocket, f"{idx + 1}/{len(self.challenge_questions)} => score actuel : {self.get_participant_score_accept(challenge, participant_id)}")
+
+                participant_score = self.get_participant_score_accept(
+                    challenge, participant_id)
+                await self.send_message(websocket, f"{idx + 1}/{len(self.challenge_questions)} => score actuel : {participant_score}")
+
+                score.score = participant_score
+                score.save()
 
         finally:
             challenge.is_ended = True
@@ -198,10 +233,50 @@ class QuizGameServer:
             else:
                 pass
 
+            score = Score()
+            score.challenge = Challenge.objects.get(id=challenge.id)
+            score.participant = Participant.objects.get(id=participant_id)
             challenge.save()
 
             await self.send_message(websocket, f"Jeu terminé")
             await self.handle_disconnect(participant_id)
+            await self.emit_top_participants(websocket)
+
+    async def emit_top_participants(self, websocket, path):
+        # # Récupérer les 10 meilleurs participants en fonction de leur score
+        # sc = Score.objects.order_by(
+        #     '-score').only('participant', 'score').exclude('id').select_related('participant').limit(10)
+        if path == "/top":
+            while True:
+                top_participants = {'top_participants': self.top_participants}
+                await self.send_message(websocket, f"{top_participants}")
+                await asyncio.sleep(6)
+
+    def update_top_participants(self):
+        # Requête pour regrouper par participant et filtrer par score
+        pipeline = [
+            {"$group": {
+                "_id": "$participant",
+                "total_score": {"$sum": "$score"}
+            }},
+            {"$sort": {
+                "total_score": -1  # Trie par score décroissant
+            }},
+            # {"$match": {
+            #     # Filtrer par score supérieur à 0 (ajustez selon vos critères)
+            #     "max_score": {"$gt": 0}
+            # }},
+            {"$limit": 10}  # Limiter les résultats aux 10 premiers participants
+        ]
+
+        results = Score.objects.aggregate(*pipeline)
+        self.top_participants = [
+            {
+                'id': result["_id"],
+                'score': result["total_score"],
+            }
+            for result in results
+        ]
 
     # difference
 
@@ -210,6 +285,7 @@ class QuizGameServer:
             if challenge.challenged and str(challenge.challenged.id) == participant_id:
                 challenge.challenged_score += 10
             challenge.save()
+            # await self.emit_top_participants()
 
     def get_participant_score_accept(self, challenge, participant_id):
         if challenge.challenged and str(challenge.challenged.id) == participant_id:
@@ -221,6 +297,7 @@ class QuizGameServer:
             if challenge.challenger and str(challenge.challenger.id) == participant_id:
                 challenge.challenger_score += 10
             challenge.save()
+            # await self.emit_top_participants()
 
     def get_participant_score_launch(self, challenge, participant_id):
         if challenge.challenger and str(challenge.challenger.id) == participant_id:
@@ -256,14 +333,13 @@ class QuizGameServer:
 
     async def send_message(self, websocket, message):
         if websocket.closed:
-            return
+            return None
         await websocket.send(message)
 
     async def receive_message(self, websocket):
         try:
             return await websocket.recv()
         except websockets.exceptions.ConnectionClosedOK:
-            print("bloooooooooooow!!!!!!!!!!")
             return None
 
     async def receive_message_with_timeout(self, websocket, duration):
@@ -282,8 +358,30 @@ class QuizGameServer:
     def stop(self):
         print("Quiz Game server stopped.")
 
+    # Mettre à jour les meilleurs participants toutes les 5 secondes
+    async def refresh_top_participants(self):
+        while True:
+            self.update_top_participants()
+            await asyncio.sleep(5)
+
+
+# if __name__ == "__main__":
+#     server = QuizGameServer()
+#     print("localhost:8527")
+
+#     # Mettre à jour les meilleurs participants toutes les 10 secondes
+#     asyncio.create_task(server.refresh_top_participants())
+
+#     await asyncio.run(server.start("localhost", 8527))
+
+async def main():
+    game_server = QuizGameServer()
+
+    # Mettre à jour les meilleurs participants toutes les 5 secondes
+    asyncio.create_task(game_server.refresh_top_participants())
+
+    # Démarrer le serveur de jeu
+    await game_server.start("localhost", 8527)
 
 if __name__ == "__main__":
-    server = QuizGameServer()
-    print("localhost:8527")
-    asyncio.run(server.start("localhost", 8527))
+    asyncio.run(main())
