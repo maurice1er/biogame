@@ -6,7 +6,7 @@ import requests
 
 from models import *
 
-from config import *
+from config.config import *
 
 
 class QuizGameServer:

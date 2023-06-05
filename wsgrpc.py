@@ -11,7 +11,7 @@ from mygRPC import usermanagement_pb2_grpc as usermanagement_pb2_grpc
 
 from models import *
 
-from config import *
+from config.config import *
 
 
 # gRPC clients
