@@ -235,4 +235,5 @@ def update_challenge(challenge_id):
 
 if __name__ == '__main__':
     socketio.run(app)
-    # socketio.run(app, debug=True)
+    # socketio.run(app, host='localhost', port=5000,
+    #              debug=True, use_reloader=True)

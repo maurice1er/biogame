@@ -1,0 +1,16 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package usermanagement;
+
+service UserService {
+  rpc CheckUserExistence(UserExistenceRequest) returns (UserExistenceResponse) {}
+}
+
+message UserExistenceRequest {
+  string participant_id = 1;
+}
+
+message UserExistenceResponse {
+  bool user_exists = 1;
+}

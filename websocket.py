@@ -3,27 +3,10 @@ import websockets
 import random
 import uuid
 import requests
-import os
 
 from models import *
 
-import mongoengine
-
-
-# Temps de rafraîchissement des top participants (en secondes)
-TOP_PARTICPANT_REFRESH_TIME = int(os.environ.get('TOP_REFRESH_TIME', 10))
-
-# Temps d'attente avant l'envoi du message aux participants (en secondes)
-TOP_PARTICPANT_MESSAGE_WAIT_TIME = int(os.environ.get('MESSAGE_WAIT_TIME', 15))
-
-# Définir la configuration de connexion à MongoDB
-mongoengine.connect(
-    db='quiz_db',
-    host='localhost',
-    port=27017,
-    username='',
-    password='',
-)
+from config import *
 
 
 class QuizGameServer:
@@ -52,10 +35,12 @@ class QuizGameServer:
 
     async def handle_client_launch(self, websocket, path):
         # Demande d'identification du participant
-        # await websocket.send("Veuillez vous identifier :")
         await self.send_message(websocket, "Veuillez vous identifier :")
         # participant_id = await websocket.recv()
         participant_id = await self.receive_message(websocket)
+
+        if participant_id == None:
+            return
 
         # Vérification si le participant existe
         p_url = f"http://127.0.0.1:5000/api/participants/{participant_id}"
@@ -70,6 +55,9 @@ class QuizGameServer:
             # return
         else:
             print(p_req.json())
+
+        if participant_id == None:
+            return
 
         # Instanciation du participant challenger
         challenger = Participant.objects.get(id=participant_id)
@@ -133,10 +121,12 @@ class QuizGameServer:
 
     async def handle_client_accept(self, websocket, path):
         # Demande d'identification du participant
-        # await websocket.send("Veuillez vous identifier :")
         await self.send_message(websocket, "Veuillez vous identifier :")
         # participant_id = await websocket.recv()
         participant_id = await self.receive_message(websocket)
+
+        if participant_id == None:
+            return
 
         # Vérification si le participant existe
         p_url = f"http://127.0.0.1:5000/api/participants/{participant_id}"
@@ -149,11 +139,8 @@ class QuizGameServer:
             await self.send_message(websocket, "Le participant a été crée avec succès")
             print({"_id": participant_id})
 
-            # await self.send_message(websocket, "Erreur : le participant n'existe pas")
-            # return
-
-        # # Instanciation du participant challenger
-        # challenger = Participant.objects.get(id=participant_id)
+        if participant_id == None:
+            return
 
         # Récupération des défis non acceptés
         challenges_url = f"http://127.0.0.1:5000/api/challenges/not-accepted/{participant_id}"
@@ -384,6 +371,7 @@ class QuizGameServer:
 
 #     await asyncio.run(server.start("localhost", 8527))
 
+
 async def main():
     game_server = QuizGameServer()
 
@@ -391,7 +379,7 @@ async def main():
     asyncio.create_task(game_server.refresh_top_participants())
 
     # Démarrer le serveur de jeu
-    await game_server.start("localhost", 8527)
+    await game_server.start(WEBSOCKET_SERVER_HOST, WEBSOCKET_SERVER_PORT)
 
 if __name__ == "__main__":
     asyncio.run(main())

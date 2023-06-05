@@ -1,6 +1,6 @@
 import mongoengine
 import time
-from models import Question, Challenge, Score, Participant
+from models import Question, Challenge, Score, Participant, ChallengeReponse
 
 # Définir la configuration de connexion à MongoDB
 mongoengine.connect(
@@ -109,6 +109,7 @@ Question.objects.delete()
 Challenge.objects.delete()
 Score.objects.delete()
 Participant.objects.delete()
+ChallengeReponse.objects.delete()
 
 
 # Insérer les questions dans la collection

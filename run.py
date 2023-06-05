@@ -2,15 +2,21 @@ import time
 import subprocess
 
 if __name__ == "__main__":
-    # Lancer le script main-launch.py dans un autre processus séparé
+    # Lancer le serveur gRPC usermanagement_server.py dans un autre processus séparé
+    grpc_server_process = subprocess.Popen(
+        ["python", "usermanagement_server.py"])
+
+    # Lancer le script backend quiz.py dans un autre processus séparé
     launch_process = subprocess.Popen(["python", "quiz.py"])
 
     # Lancer le script main-accept.py dans un processus séparé
-    accept_process = subprocess.Popen(["python", "websocket.py"])
+    accept_process = subprocess.Popen(["python", "wsgrpc.py"])
 
     # Attendre la fin des deux processus
-    accept_process.wait()
+    grpc_server_process()
+    time.sleep(3)
 
-    time.sleep(5)
+    accept_process.wait()
+    time.sleep(3)
 
     launch_process.wait()

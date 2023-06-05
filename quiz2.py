@@ -8,7 +8,9 @@ from datetime import datetime, timedelta
 import random
 import uuid
 import json
-from typing import List
+from typing import List, Optional
+
+from models import *
 
 app = FastAPI()
 
@@ -18,16 +20,30 @@ connect(db='quiz_db', host='mongodb://localhost', port=27017)
 # Déclaration des classes de modèles
 
 
-# class QuestionModel(BaseModel):
-#     id: str
-#     question: str
-#     options: List[str]
-#     answer: str
-#     duration: int
-#     created_by: str
-#     created_at: datetime
-#     modified_at: datetime
-#     is_enable: bool
+class QuestionModel(BaseModel):
+    # id: str
+    # question: str
+    # hint: Optional[str]
+    # images: Optional[List[str]]
+    # options: List[str]
+    # answer: str
+    # duration: int
+    # created_by: str
+    # created_at: datetime
+    # modified_at: datetime
+    # is_enable: bool
+
+    id: Optional[str]
+    question: str
+    hint: Optional[str]
+    images: Optional[List[str]]
+    options: List[str]
+    answer: str
+    duration: int
+    created_by: str
+    created_at: datetime
+    modified_at: datetime
+    is_enable: bool
 
 
 class ParticipantModel(BaseModel):
@@ -149,6 +165,19 @@ class Participant(Document):
 # Routes pour les participants
 
 
+@app.get("/api/questions", response_model=List[QuestionModel])
+async def get_questions():
+    questions = Question.objects()
+    questions = json.loads(questions.to_json())
+    return questions
+
+
+@app.post("/api/questions")
+def create_question(question: QuestionModel):
+    question.save()
+    return {"message": "Question created successfully"}
+
+
 @app.get('/api/participants',)
 def get_participants():
     participants = Participant.objects()
@@ -253,15 +282,14 @@ def get_participants():
 # # Autres routes
 
 
-@app.get('/')
-async def root():
-    return {'message': 'Welcome to the Quiz API'}
+# @app.get('/')
+# async def root():
+#     return {'message': 'Welcome to the Quiz API'}
 
 # # Montage des fichiers statiques
 # # app.mount('/static', StaticFiles(directory='static'), name='static')
 
-
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", host='localhost',
-                port=5500, workers=1, reload=True)
+    uvicorn.run("quiz2:app", host='localhost',
+                port=5550, workers=1, reload=True)

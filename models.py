@@ -73,3 +73,16 @@ class Score(Document):
     meta = {
         'collection': 'scores'
     }
+
+
+class ChallengeReponse(Document):
+    id = StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
+    challenge = ReferenceField('Challenge', required=True)
+    participant = ReferenceField('Participant', required=True)
+    question = ReferenceField('Question')
+    reponse = StringField(required=False)
+    is_correct = BooleanField(default=False)
+
+    meta = {
+        'collection': 'challenge_responses'
+    }
