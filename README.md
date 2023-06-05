@@ -8,11 +8,19 @@ Upon successful verification of the user's existence, the websocket server proce
 
 Overall, the Biogame application provides an entertaining and educational environment for users to engage in agricultural quizzes, fostering knowledge sharing and friendly competition within the agriculture community.
 
+## Clone project
+
+```
+git clone https://github.com/maurice1er/biogame.git
+cd biogame
+```
+
 ## Activate environment variable
 
 To activate the virtual environment, run the following command:
 
 ```
+python3 -m venv socket
 source socket/bin/activate
 ```
 
@@ -35,10 +43,6 @@ WEBSOCKET_SERVER_PORT=8527
 ```
 
 ## Compile .proto file
-
-```
-cd mygRPC
-```
 
 ```python
 python -m grpc_tools.protoc -I mygRPC --python_out=mygRPC --grpc_python_out=mygRPC mygRPC/usermanagement.proto
