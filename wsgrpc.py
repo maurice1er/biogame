@@ -119,8 +119,9 @@ class QuizGameServer:
             requests.post(create_participant_url, json={"id": participant_id})
             challenger = Participant.objects.get(id=participant_id)
 
-        # Récupération des questions du défi
-        questions = requests.get("http://127.0.0.1:5000/api/questions")
+        # Récupération des questions aleatoirelement du défi
+        random_question_url = f"http://localhost:5000/api/questions/random?num_questions={RANDOM_QUESTION_NUMBER}"
+        questions = requests.get(random_question_url)
         if questions.status_code == 200:
             self.questions = questions.json()
 

@@ -125,18 +125,18 @@ for question_data in questions_list:
 participants = [
     {
         "id": "6e01900e-4afd-48b7-95a1-513f0e50aeb4",
-        "is_denied": False,
-        "is_blocked": False
+        # "is_denied": False,
+        # "is_blocked": False
     },
     {
         "id": "6e01900e-4afd-48b7-95a1-513f0e50aeb5",
-        "is_denied": False,
-        "is_blocked": False
+        # "is_denied": False,
+        # "is_blocked": False
     },
     {
         "id": "6e01900e-4afd-48b7-95a1-513f0e50aeb6",
-        "is_denied": False,
-        "is_blocked": False
+        # "is_denied": False,
+        # "is_blocked": False
     }
 ]
 

@@ -32,6 +32,8 @@ Make sure to configure the following environment variables in your .env file:
 TOP_PARTICPANT_REFRESH_TIME = 5
 TOP_PARTICPANT_MESSAGE_WAIT_TIME = 6
 
+RANDOM_QUESTION_NUMBER = 3
+
 MONGO_DB_NAME=quiz_db
 MONGO_DB_HOST=localhost
 MONGO_DB_PORT=27017

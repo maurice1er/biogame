@@ -1,7 +1,11 @@
-from mongoengine import Document, StringField, ListField, IntField, DateTimeField, BooleanField, ReferenceField
+from mongoengine import connect, Q, Document, StringField, ListField, IntField, DateTimeField, BooleanField, ReferenceField
 from datetime import datetime
 import uuid
+from typing import List, Optional
 
+from pydantic import BaseModel
+
+# Mongo
 
 class Question(Document):
     id = StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -28,8 +32,8 @@ class Question(Document):
 
 class Participant(Document):
     id = StringField(primary_key=True)
-    is_blocked = BooleanField(default=False)
-    is_denied = BooleanField(default=False)
+    # is_blocked = BooleanField(default=False)
+    # is_denied = BooleanField(default=False)
 
     meta = {
         'collection': 'participants'
@@ -86,3 +90,62 @@ class ChallengeReponse(Document):
     meta = {
         'collection': 'challenge_responses'
     }
+
+
+# FastAPI
+
+
+class QuestionModel(BaseModel):
+    id: Optional[str]
+    question: str
+    hint: Optional[str]
+    images: Optional[List[str]]
+    options: List[str]
+    answer: str
+    duration: int
+    created_by: str
+    created_at: Optional[datetime]
+    modified_at: Optional[datetime]
+    is_enable: bool
+
+
+class QuestionCreateModel(BaseModel):
+    question: str
+    hint: Optional[str]
+    images: Optional[List[str]]
+    options: List[str]
+    answer: str
+    duration: int
+    created_by: str
+    is_enable: bool
+
+
+class QuestionUpdateModel(BaseModel):
+    question: Optional[str]
+    hint: Optional[str]
+    images: Optional[List[str]]
+    options: Optional[List[str]]
+    answer: Optional[str]
+    duration: Optional[int]
+    is_enable: Optional[bool]
+
+
+class ParticipantModel(BaseModel):
+    id: str
+    # is_blocked: bool
+    # is_denied: bool
+
+
+class ChallengeModel(BaseModel):
+    id: str
+    challenger: ParticipantModel
+    challenged: Optional[ParticipantModel]
+    winner: Optional[ParticipantModel]
+    is_started: bool = True
+    is_ended: bool = False
+    launched_date: datetime
+    accepted_date: Optional[datetime]
+    ended_date: Optional[datetime]
+    challenger_score: int
+    challenged_score: int
+    questions: list[QuestionModel]
