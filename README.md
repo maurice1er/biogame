@@ -10,7 +10,7 @@ Overall, the Biogame application provides an entertaining and educational enviro
 
 ## Clone project
 
-```
+```sh
 git clone https://github.com/maurice1er/biogame.git
 cd biogame
 ```
@@ -44,12 +44,12 @@ WEBSOCKET_SERVER_PORT=8527
 
 ## Compile .proto file
 
-```python
+```py
 python -m grpc_tools.protoc -I mygRPC --python_out=mygRPC --grpc_python_out=mygRPC mygRPC/usermanagement.proto
 ```
 
 ## Run app
 
-```python
-python run.py
+```shell
+./init.sh
 ```

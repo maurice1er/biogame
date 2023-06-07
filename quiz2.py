@@ -21,18 +21,6 @@ connect(db='quiz_db', host='mongodb://localhost', port=27017)
 
 
 class QuestionModel(BaseModel):
-    # id: str
-    # question: str
-    # hint: Optional[str]
-    # images: Optional[List[str]]
-    # options: List[str]
-    # answer: str
-    # duration: int
-    # created_by: str
-    # created_at: datetime
-    # modified_at: datetime
-    # is_enable: bool
-
     id: Optional[str]
     question: str
     hint: Optional[str]
@@ -41,13 +29,26 @@ class QuestionModel(BaseModel):
     answer: str
     duration: int
     created_by: str
-    created_at: datetime
-    modified_at: datetime
+    created_at: Optional[datetime]
+    modified_at: Optional[datetime]
+    is_enable: bool
+
+
+class QuestionCreateModel(BaseModel):
+    question: str
+    hint: Optional[str]
+    images: Optional[List[str]]
+    options: List[str]
+    answer: str
+    duration: int
+    created_by: str
     is_enable: bool
 
 
 class ParticipantModel(BaseModel):
     id: str
+    is_blocked: bool
+    is_denied: bool
 
 
 # class ChallengeModel(BaseModel):
@@ -64,74 +65,26 @@ class ParticipantModel(BaseModel):
 #     challenged_score: int
 #     questions: list[QuestionModel]
 
-# Déclaration des modèles MongoEngine
-
-
-# class Question(Document):
-#     id = StringField(primary_key=True, default=str(uuid.uuid4()))
-#     question = StringField(required=True)
-#     options = ListField(StringField(), required=True)
-#     answer = StringField(required=True)
-#     duration = IntField(default=5)
-
-#     created_by = StringField(required=True)
-
-#     created_at = DateTimeField(default=datetime.now)
-#     modified_at = DateTimeField(default=datetime.now)
-
-#     is_enable = BooleanField(default=True)
-
-#     meta = {
-#         'collection': 'questions'
-#     }
-
-
-class Participant(Document):
-    id = StringField(primary_key=True)
-
-    meta = {
-        'collection': 'participants'
-    }
-
-
-# class Challenge(Document):
-#     id = StringField(primary_key=True)
-#     challenger = ReferenceField(Participant)
-#     challenged = ReferenceField(Participant, default=None)
-#     winner = ReferenceField(Participant, default=None)
-
-#     is_started = BooleanField(default=True)
-#     is_ended = BooleanField(default=False)
-
-#     launched_date = DateTimeField(default=datetime.now)
-
-#     accepted_date = DateTimeField(default=None)
-#     ended_date = DateTimeField(default=None)
-
-#     # Score des participants
-#     challenger_score = IntField(default=0)
-#     challenged_score = IntField(default=0)
-
-#     questions = ListField(ReferenceField(Question), required=True)
-
-#     meta = {
-#         'collection': 'challenges'
-#     }
 
 # Routes pour les questions
 
+@app.get("/api/questions", response_model=List[QuestionModel], tags=["Questions"])
+async def get_questions():
+    questions = Question.objects().to_json()
+    questions_json = json.loads(questions)
 
-# @app.get('/api/questions', response_model=List[QuestionModel])
-# def get_questions():
-#     questions = Question.objects()
-#     return questions
+    return JSONResponse(content=questions_json)
 
 
-# @app.post('/api/questions', response_model=QuestionModel)
-# def create_question(question: QuestionModel):
-#     question_obj = Question(**question.dict())
-#     question_obj.save()
-#     return question_obj
+@app.post('/api/questions', response_model=QuestionModel, tags=["Questions"])
+def create_question(question: QuestionCreateModel):
+    question_obj = Question(**question.dict())
+    question_obj.save()
+    print(question_obj)
+
+    # return question.dict()
+    return {}
+    return JSONResponse(content=question_obj)
 
 
 # @app.get('/api/questions/{question_id}', response_model=QuestionModel)
@@ -165,25 +118,25 @@ class Participant(Document):
 # Routes pour les participants
 
 
-@app.get("/api/questions", response_model=List[QuestionModel])
-async def get_questions():
-    questions = Question.objects()
-    questions = json.loads(questions.to_json())
-    return questions
+# @app.get("/api/questions", response_model=List[QuestionModel])
+# async def get_questions():
+#     questions = Question.objects()
+#     questions = json.loads(questions.to_json())
+#     return questions
 
 
-@app.post("/api/questions")
-def create_question(question: QuestionModel):
-    question.save()
-    return {"message": "Question created successfully"}
+# @app.post("/api/questions")
+# def create_question(question: QuestionModel):
+#     question.save()
+#     return {"message": "Question created successfully"}
 
 
-@app.get('/api/participants',)
-def get_participants():
-    participants = Participant.objects()
-    participants = json.loads(participants.to_json())
-    # print(participants.to_json())
-    return participants
+# @app.get('/api/participants',)
+# def get_participants():
+#     participants = Participant.objects()
+#     participants = json.loads(participants.to_json())
+#     # print(participants.to_json())
+#     return participants
 
 
 # @app.post('/api/participants', response_model=ParticipantModel)
@@ -292,4 +245,5 @@ def get_participants():
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run("quiz2:app", host='localhost',
+                log_level="info",
                 port=5550, workers=1, reload=True)

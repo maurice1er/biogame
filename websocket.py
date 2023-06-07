@@ -349,7 +349,7 @@ class QuizGameServer:
 
     async def start(self, host, port):
         async with websockets.serve(self.handle_client, host, port):
-            print("Quiz Game server started.")
+            print("Socket Server started --> ws://[::]:8527")
             await asyncio.Future()  # Keep the server running indefinitely
 
     def stop(self):

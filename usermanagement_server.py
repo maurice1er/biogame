@@ -1,4 +1,7 @@
 import grpc
+
+from grpc import RpcError
+
 import requests
 from concurrent import futures
 from datetime import datetime
@@ -15,13 +18,18 @@ class UserService(usermanagement_pb2_grpc.UserServiceServicer):
         # Logique de vérification de l'existence de l'utilisateur
         participant_id = request.participant_id
 
-        # Effectuer la vérification dans votre microservice "msuser"
-        msuser_url = f"http://localhost:1105/api/users/id/{participant_id}"
-        response = requests.get(msuser_url)
+        try:
+            # Effectuer la vérification dans votre microservice "msuser"
+            msuser_url = f"http://localhost:1105/api/users/id/{participant_id}"
+            response = requests.get(msuser_url)
 
-        user_exists = response.status_code == 200
+            user_exists = response.status_code == 200
 
-        return usermanagement_pb2.UserExistenceResponse(user_exists=user_exists)
+            return usermanagement_pb2.UserExistenceResponse(user_exists=user_exists)
+        # except requests.exceptions.RequestException as e:
+        #     print('Request Exception')
+        except:
+            return usermanagement_pb2.UserExistenceResponse(user_exists=False)
 
 
 def serve():
