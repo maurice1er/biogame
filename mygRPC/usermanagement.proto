@@ -14,3 +14,11 @@ message UserExistenceRequest {
 message UserExistenceResponse {
   bool user_exists = 1;
 }
+
+// message UserInfoRequest {
+//   string participant_id = 1;
+// }
+
+// message UserInfoResponse {
+//   bool user_exists = 1;
+// }

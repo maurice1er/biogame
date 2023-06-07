@@ -2,10 +2,12 @@ from mongoengine import connect, Q, Document, StringField, ListField, IntField, 
 from datetime import datetime
 import uuid
 from typing import List, Optional
+from fastapi import UploadFile, File
 
 from pydantic import BaseModel
 
 # Mongo
+
 
 class Question(Document):
     id = StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -112,12 +114,12 @@ class QuestionModel(BaseModel):
 class QuestionCreateModel(BaseModel):
     question: str
     hint: Optional[str]
-    images: Optional[List[str]]
+    # images: Optional[List[str]]
     options: List[str]
     answer: str
     duration: int
     created_by: str
-    is_enable: bool
+    # is_enable: bool
 
 
 class QuestionUpdateModel(BaseModel):
