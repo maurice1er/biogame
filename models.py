@@ -10,6 +10,11 @@ from pydantic import BaseModel
 
 
 class Question(Document):
+    LANG_CHOICES = (
+        ('fr', 'French'),
+        ('en', 'English'),
+    )
+
     id = StringField(primary_key=True, default=lambda: str(uuid.uuid4()))
     question = StringField(required=True)
     hint = StringField(required=False)
@@ -18,6 +23,9 @@ class Question(Document):
 
     options = ListField(StringField(), required=True)
     answer = StringField(required=True)
+
+    language = StringField(choices=LANG_CHOICES, default='fr', required=True)
+
     duration = IntField(default=10)
 
     created_by = StringField(required=True)
@@ -119,6 +127,7 @@ class QuestionCreateModel(BaseModel):
     answer: str
     duration: int
     created_by: str
+    language: str = "fr"
     # is_enable: bool
 
 
@@ -130,6 +139,7 @@ class QuestionUpdateModel(BaseModel):
     answer: Optional[str]
     duration: Optional[int]
     is_enable: Optional[bool]
+    language: Optional[str]
 
 
 class ParticipantModel(BaseModel):
