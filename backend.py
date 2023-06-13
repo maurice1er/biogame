@@ -450,8 +450,12 @@ def get_challenge(challenge_id: str):
 #     return {'message': 'Welcome to the Quiz API'}
 # # Montage des fichiers statiques
 # # app.mount('/static', StaticFiles(directory='static'), name='static')
+
+
+"""
 if __name__ == '__main__':
     print("Backend Server started --> [::]:8000")
-    uvicorn.run("backend:app",
+    uvicorn.run("backend:app", host='127.0.0.1',
                 # log_level="info",
                 port=backend_port)  # , workers=1, reload=True)
+"""
