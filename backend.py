@@ -17,8 +17,8 @@ from typing import Optional, List
 from models import *
 
 app = FastAPI(
-    title="AutoML",
-    description="""**Auto Machine Learning App**""",
+    title="BBio",
+    description="""**Quiz Game**""",
     version="0.0.1",
     contact={
         "name": "Armel DREY",
