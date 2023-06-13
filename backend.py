@@ -55,13 +55,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("started..")
 
 # Configuration de la connexion à la base de données
-try:
-    connect(db='quiz_db', host='mongodb://localhost', port=27017)
-except:
-    print("db error")
+connect(db='quiz_db', host='mongodb://localhost', port=27017)
 
 # Set up a custom logger
 logger = logging.getLogger(__name__)
@@ -454,12 +450,8 @@ def get_challenge(challenge_id: str):
 #     return {'message': 'Welcome to the Quiz API'}
 # # Montage des fichiers statiques
 # # app.mount('/static', StaticFiles(directory='static'), name='static')
-
-
-"""
 if __name__ == '__main__':
-    print("Backend Server started --> [::]:8000")
-    uvicorn.run("backend:app", host='127.0.0.1',
+    print("Backend Server started --> [::]:5000")
+    uvicorn.run("backend:app", host='localhost',
                 # log_level="info",
-                port=backend_port)  # , workers=1, reload=True)
-"""
+                port=backend_port, workers=1, reload=True)
