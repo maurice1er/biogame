@@ -454,4 +454,4 @@ if __name__ == '__main__':
     print("Backend Server started --> [::]:5000")
     uvicorn.run("backend:app", host='[::]',
                 # log_level="info",
-                port=backend_port, workers=1, reload=True)
+                port=backend_port)  # , workers=1, reload=True)
