@@ -55,9 +55,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+print("started..")
 
 # Configuration de la connexion à la base de données
-connect(db='quiz_db', host='mongodb://localhost', port=27017)
+try:
+    connect(db='quiz_db', host='mongodb://localhost', port=27017)
+except:
+    print("db error")
 
 # Set up a custom logger
 logger = logging.getLogger(__name__)
