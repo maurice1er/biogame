@@ -452,6 +452,6 @@ def get_challenge(challenge_id: str):
 # # app.mount('/static', StaticFiles(directory='static'), name='static')
 if __name__ == '__main__':
     print("Backend Server started --> [::]:8000")
-    uvicorn.run("backend:app", host='0.0.0.0',
+    uvicorn.run("backend:app", host='https://biogame-production.up.railway.app',
                 # log_level="info",
                 port=backend_port)  # , workers=1, reload=True)
