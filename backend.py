@@ -13,8 +13,19 @@ import random
 import json
 import logging
 from typing import Optional, List
+import os
 
 from models import *
+
+from dotenv import load_dotenv
+
+
+# charger les variables d'environnement
+load_dotenv()
+
+
+backend_port = int(os.getenv('BACKEND_PORT'))
+
 
 app = FastAPI(
     title="BBio",
@@ -43,6 +54,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Configuration de la connexion à la base de données
 connect(db='quiz_db', host='mongodb://localhost', port=27017)
@@ -442,4 +454,4 @@ if __name__ == '__main__':
     print("Backend Server started --> [::]:5000")
     uvicorn.run("backend:app", host='localhost',
                 # log_level="info",
-                port=5000, workers=1, reload=True)
+                port=backend_port, workers=1, reload=True)
