@@ -90,11 +90,11 @@ class QuizGameServer:
             await self.emit_top_participants(websocket, path)
         else:
             # await websocket.send("Chemin non valide")
-            await self.send_json_message(websocket, "message", "Chemin non valide")
+            await self.send_json_message_with_status(websocket, "message", "Chemin non valide")
 
     async def handle_client_launch(self, websocket, path):
         # Demande d'identification du participant
-        await self.send_json_message(websocket, "message", "Veuillez vous identifier")
+        await self.send_json_message_with_status(websocket, "message", "Veuillez vous identifier")
         _participant = await self.receive_message(websocket)
 
         participant_id = _participant["participant_id"]
@@ -106,10 +106,10 @@ class QuizGameServer:
         print(f"User exists: {user_exists}")
 
         if user_exists['state'] == False:
-            await self.send_json_message(websocket, "message", "identification incorrect", status=user_exists['status'])
+            await self.send_json_message_with_status(websocket, "message", "identification incorrect", status=user_exists['status'])
             return
 
-        await self.send_json_message(websocket, "message", "identification correct")
+        await self.send_json_message_with_status(websocket, "message", "identification correct")
 
         # Instanciation du participant challenger
         try:
@@ -152,14 +152,14 @@ class QuizGameServer:
             for (idx, question) in enumerate(self.challenge_questions):
                 correct_answer = question['answer']
                 duration = question['duration']
-                await self.send_json_message(websocket, "duration", f"{duration}")
+                await self.send_json_message_with_status(websocket, "duration", f"{duration}")
 
                 # question_json = {"question": question['question']}
                 # await self.send_question(websocket, f"{question_json}")
-                await self.send_json_message(websocket, "question", f"{question['question']}")
+                await self.send_json_message_with_status(websocket, "question", f"{question['question']}")
 
                 # options_json = {"options": question['options']}
-                await self.send_json_message(websocket, "options", f"{question['options']}")
+                await self.send_json_message_with_status(websocket, "options", f"{question['options']}")
 
                 answer = await self.receive_message_with_timeout(websocket, duration)
 
@@ -177,13 +177,13 @@ class QuizGameServer:
                 score.save()
 
         finally:
-            await self.send_json_message(websocket, "message", "Jeu  termine")
+            await self.send_json_message_with_status(websocket, "message", "Jeu  termine")
             await self.handle_disconnect(participant_id)
             await self.emit_top_participants(websocket, path)
 
     async def handle_client_accept(self, websocket, path):
         # Demande d'identification du participant
-        await self.send_json_message(websocket, "message", "Veuillez vous identifier")
+        await self.send_json_message_with_status(websocket, "message", "Veuillez vous identifier")
         # participant_id = await websocket.recv()
         # participant_id = await self.receive_message(websocket)
 
@@ -198,34 +198,34 @@ class QuizGameServer:
         print(f"User exists: {user_exists}")
 
         if user_exists['state'] == False:
-            await self.send_json_message(websocket, "message", "identification incorrect", status=user_exists['status'])
+            await self.send_json_message_with_status(websocket, "message", "identification incorrect", status=user_exists['status'])
             return
 
-        await self.send_json_message(websocket, "message", "identification correct")
+        await self.send_json_message_with_status(websocket, "message", "identification correct")
 
         # Récupération des défis non acceptés
         challenges_url = f"http://127.0.0.1:5000/api/challenges/not-accepted/{participant_id}"
         challenges_req = requests.get(challenges_url)
 
         if challenges_req.status_code != 200:
-            await self.send_json_message(websocket, "Erreur", "impossible de récupérer la liste des defis", status=500)
+            await self.send_json_message_with_status(websocket, "Erreur", "impossible de récupérer la liste des defis", status=500)
             return
 
         challenges = challenges_req.json()
 
         if len(challenges) == 0:
-            await self.send_json_message(websocket, "message", "Aucun defi disponible.")
+            await self.send_json_message_with_status(websocket, "message", "Aucun defi disponible.")
             return
 
         # Affichage des défis disponibles
-        await self.send_json_message(websocket, "message", "Liste des defis disponibles.")
+        await self.send_json_message_with_status(websocket, "message", "Liste des defis disponibles.")
         for challenge in challenges:
             chg = {"id": challenge['_id'],
                    "challenger": challenge['challenger']}
             await self.send_message(websocket, f"{chg}")
 
         # Réception du choix de défi de l'utilisateur
-        await self.send_json_message(websocket, "message", "Veuillez saisir l'ID du défi que vous souhaitez rejoindre")
+        await self.send_json_message_with_status(websocket, "message", "Veuillez saisir l'ID du défi que vous souhaitez rejoindre")
         # challenge_id = await websocket.recv()
         _challenge = await self.receive_message(websocket)
         challenge_id = _challenge["challenge_id"]
@@ -238,7 +238,7 @@ class QuizGameServer:
                 break
 
         if chosen_challenge is None:
-            await self.send_json_message(websocket, "message", "défi invalide", status=500)
+            await self.send_json_message_with_status(websocket, "message", "défi invalide", status=500)
             return
         self.chosen_challenge = chosen_challenge
         self.challenge_questions = chosen_challenge['questions']
@@ -272,10 +272,10 @@ class QuizGameServer:
             for (idx, question) in enumerate(self.challenge_questions):
                 correct_answer = question['answer']
                 duration = question['duration']
-                await self.send_json_message(websocket, "duration", f"{duration}s")
+                await self.send_json_message_with_status(websocket, "duration", f"{duration}s")
 
                 # await self.send_question(websocket, question['question'])
-                await self.send_json_message(websocket, "question", f"{question['question']}")
+                await self.send_json_message_with_status(websocket, "question", f"{question['question']}")
                 answer = await self.receive_message_with_timeout(websocket, duration)
 
                 is_correct = await self.check_answers(websocket, answer, correct_answer)
@@ -308,7 +308,7 @@ class QuizGameServer:
             score.participant = Participant.objects.get(id=participant_id)
             challenge.save()
 
-            await self.send_json_message(websocket, "message", "Jeu termine")
+            await self.send_json_message_with_status(websocket, "message", "Jeu termine")
             await self.handle_disconnect(participant_id)
             await self.emit_top_participants(websocket, path)
 
@@ -318,8 +318,8 @@ class QuizGameServer:
         #     '-score').only('participant', 'score').exclude('id').select_related('participant').limit(10)
         if path == "/top":
             while True:
-                top_participants = {'top_participants': self.top_participants}
-                await self.send_message(websocket, f"{top_participants}")
+                top_participants = {"top_participants": self.top_participants}
+                await self.send_json_message(websocket, "top_participants", self.top_participants)
                 await asyncio.sleep(TOP_PARTICPANT_MESSAGE_WAIT_TIME)
 
     def update_top_participants(self):
@@ -399,12 +399,12 @@ class QuizGameServer:
             return False
         if answer['answer'] == correct_answer:
             value = f"Correct!"
-            await self.send_json_message(websocket, "message", value)
+            await self.send_json_message_with_status(websocket, "message", value)
 
             return True
         else:
             value = f"Incorrect! The correct answer is {correct_answer}."
-            await self.send_json_message(websocket, "message", value)
+            await self.send_json_message_with_status(websocket, "message", value)
 
             return False
 
@@ -414,7 +414,15 @@ class QuizGameServer:
 
         await websocket.send(message)
 
-    async def send_json_message(self, websocket, key, value, status=200):
+    async def send_json_message(self, websocket, key, value):
+        if websocket.closed:
+            return None
+
+        json_message = {key: value}
+        json_string = json.dumps(json_message)
+        await websocket.send(json_string)
+
+    async def send_json_message_with_status(self, websocket, key, value, status=200):
         if websocket.closed:
             return None
 

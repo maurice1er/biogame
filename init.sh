@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 
+source socket/bin/activate
+
 # Lancer le serveur gRPC usermanagement_server.py dans un autre processus séparé
 python usermanagement_server.py &
 
