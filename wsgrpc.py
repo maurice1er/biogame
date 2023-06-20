@@ -106,11 +106,13 @@ class QuizGameServer:
         user_exists = check_user_existence(participant_id)
         print(f"User exists: {user_exists}")
 
+        participant_score = 0
+
         if user_exists['state'] == False:
-            await self.send_json_message_with_status(websocket, "message", "identification incorrect", status=user_exists['status'])
+            await self.send_json_message_with_status(websocket, "user_exist", False, status=user_exists['status'])
             return
 
-        await self.send_json_message_with_status(websocket, "message", "identification correct")
+        await self.send_json_message_with_status(websocket, "user_exist", True)
 
         # Instanciation du participant challenger
         try:
@@ -160,6 +162,7 @@ class QuizGameServer:
                 quizz = {
                     "question": question['question'],
                     "options": question['options'],
+                    "answer": correct_answer,
                     "duration": duration
                 }
 
@@ -172,8 +175,17 @@ class QuizGameServer:
                 await self.send_json_message(websocket, "quizz", quizz)
 
                 answer = await self.receive_message_with_timeout(websocket, duration)
+                # answer = await self.receive_message(websocket)
 
-                is_correct = await self.check_answers(websocket, answer, correct_answer)
+                # {"skip": True}
+                skip_question = await self.skip_question(is_skip=answer)
+                if skip_question == True:
+                    continue
+
+                _answer = await self.get_response_from_socket(answer=answer)
+                print("answer -+-+>", _answer)
+
+                is_correct = await self.check_answers(websocket, correct_answer=correct_answer, answer=_answer)
                 await self.process_score_launch(challenge, participant_id, is_correct)
 
                 insert_challenge_response(
@@ -186,9 +198,13 @@ class QuizGameServer:
                 score.score = participant_score
                 score.save()
 
+                await asyncio.sleep(1)
+
         finally:
             await self.send_json_message_with_status(websocket, "end", True)
-            await self.handle_disconnect(participant_id)
+            await self.send_json_message_with_status(websocket, "score_final", participant_score)
+
+            # await self.handle_disconnect(participant_id)
             await self.emit_top_participants(websocket, path)
 
     async def handle_client_accept(self, websocket, path):
@@ -324,6 +340,18 @@ class QuizGameServer:
             await self.handle_disconnect(participant_id)
             await self.emit_top_participants(websocket, path)
 
+    async def skip_question(self, is_skip):
+        if is_skip is None or "skip" in is_skip:
+            return True
+
+        return False
+
+    async def get_response_from_socket(self, answer):
+        if answer is not None and "answer" in answer:
+            return answer["answer"]
+
+        return -1
+
     async def emit_top_participants(self, websocket, path):
         # # Récupérer les 10 meilleurs participants en fonction de leur score
         # sc = Score.objects.order_by(
@@ -391,7 +419,8 @@ class QuizGameServer:
             score = self.participants[participant_id]['score']
             websocket = self.participants[participant_id]['websocket']
 
-            await self.send_message(websocket, f"{participant_id} => Votre score final est : {score}")
+            # await self.send_message(websocket, f"{participant_id} => Votre score final est : {score}")
+            await self.send_json_message(websocket, "score_final", score)
 
             del self.participants[participant_id]
             print(f"Participant {participant_id} déconnecté.")
@@ -401,23 +430,11 @@ class QuizGameServer:
         await self.send_message(websocket, initial_message)
         self.counter += 1
 
-    # async def send_question(self, websocket, question):
-    #     await self.send_message(websocket, question)
-
-    async def check_answers(self, websocket, answer, correct_answer):
-
-        if answer == None:
+    async def check_answers(self, websocket, correct_answer, answer=-1):
+        if answer == -1 or answer != correct_answer:
             return False
-        if answer['answer'] == correct_answer:
-            value = f"Correct!"
-            await self.send_json_message_with_status(websocket, "message", value)
-
-            return True
         else:
-            value = f"Incorrect! The correct answer is {correct_answer}."
-            await self.send_json_message_with_status(websocket, "message", value)
-
-            return False
+            return True
 
     async def send_message(self, websocket, message):
         if websocket.closed:
@@ -455,9 +472,6 @@ class QuizGameServer:
     async def receive_message(self, websocket):
         try:
             response = await websocket.recv()
-            print(" ")
-            print(type(response))
-            print(" ")
             json_response = json.loads(response)
             return json_response
         except websockets.exceptions.ConnectionClosedOK:
@@ -488,16 +502,6 @@ class QuizGameServer:
         while True:
             self.update_top_participants()
             await asyncio.sleep(TOP_PARTICPANT_REFRESH_TIME)
-
-
-# if __name__ == "__main__":
-#     server = QuizGameServer()
-#     print("localhost:8527")
-
-#     # Mettre à jour les meilleurs participants toutes les 10 secondes
-#     asyncio.create_task(server.refresh_top_participants())
-
-#     await asyncio.run(server.start("localhost", 8527))
 
 
 async def main():

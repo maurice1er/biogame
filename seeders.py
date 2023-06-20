@@ -21,7 +21,7 @@ questions_list = [
             "Biodégradation",
             "Compostage"
         ],
-        "answer": "Compostage",
+        "answer": "4",
         "duration": 10
     },
     {
@@ -32,7 +32,7 @@ questions_list = [
             "La décomposition des matières organiques",
             "L'absorption de l'eau et des nutriments par les racines"
         ],
-        "answer": "La transformation de l'énergie solaire en énergie chimique",
+        "answer": "2",
         "duration": 10
     },
     {
@@ -44,7 +44,7 @@ questions_list = [
             "Engrais organique",
             "Engrais foliaire"
         ],
-        "answer": "Engrais organique",
+        "answer": "3",
         "duration": 10
     },
     # {
