@@ -1,0 +1,1 @@
+docker rm -f grpc && docker build -t grpc-server . && docker run -itd -p 50051:50051 -e MS_USER_HOST=http://host.docker.internal:1105/api/users/id -v `pwd`:/usr/src/app --network=bridge --name grpc grpc-server 

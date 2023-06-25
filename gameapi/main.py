@@ -7,6 +7,7 @@ import base64
 
 import uvicorn
 from mongoengine import Q
+import mongoengine
 
 from datetime import datetime, timedelta
 import random
@@ -20,11 +21,24 @@ from models import *
 from dotenv import load_dotenv
 
 
-# charger les variables d'environnement
-load_dotenv()
-
-
+db_name = os.getenv('MONGO_DB_NAME')
+db_host = os.getenv('MONGO_DB_HOST')
+db_port = int(os.getenv('MONGO_DB_PORT'))
+db_username = os.getenv('MONGO_DB_USERNAME')
+db_password = os.getenv('MONGO_DB_PASSWORD')
 backend_port = int(os.getenv('BACKEND_PORT'))
+
+# Définir la configuration de connexion à MongoDB
+mongoengine.connect(
+    db=db_name,
+    host=db_host,
+    port=db_port,
+    username=db_username,
+    password=db_password,
+)
+
+# Configuration de la connexion à la base de données
+# connect(db=db_name, host=f'mongodb://{db_host}', port=db_port)
 
 
 app = FastAPI(
@@ -38,13 +52,7 @@ app = FastAPI(
 )
 
 origins = [
-    "http://localhost",
-    "http://localhost:3001",
-    "http://test.localhost:3001",
-    "http://localhost:3000",
-    "http://test.localhost:3000",
-    "https://ec2-3-93-13-166.compute-1.amazonaws.com",
-    "https://ec2-3-93-13-166.compute-1.amazonaws.com:8070"
+    "*",
 ]
 
 app.add_middleware(
@@ -54,10 +62,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# Configuration de la connexion à la base de données
-connect(db='quiz_db', host='mongodb://localhost', port=27017)
 
 # Set up a custom logger
 logger = logging.getLogger(__name__)
@@ -445,13 +449,28 @@ def get_challenge(challenge_id: str):
 
 # # Autres routes
 
-# @app.get('/')
-# async def root():
-#     return {'message': 'Welcome to the Quiz API'}
+@app.get('/')
+async def root():
+    return {'message': 'Welcome to the Quiz API'}
+
+
 # # Montage des fichiers statiques
 # # app.mount('/static', StaticFiles(directory='static'), name='static')
+
 if __name__ == '__main__':
-    print("Backend Server started --> [::]:5000")
-    uvicorn.run("backend:app", host='localhost',
-                # log_level="info",
-                port=backend_port, workers=1, reload=True)
+
+    print(" ")
+    print(
+        f"env --> {db_name},{db_host},{db_port},{db_username},{db_password},{backend_port}")
+
+    print(" ")
+    print(f"Backend Server started --> [::]:{backend_port}")
+
+    print(" ")
+    print(Participant.objects.all())
+    print(" ")
+
+    uvicorn.run(app, host='0.0.0.0', port=backend_port)
+
+    # uvicorn.run("main:app", host='localhost', workers=1, reload=True)
+    # uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,0 +1,1 @@
+docker rm -f gameapi && docker build -t gameapi . && docker run -itd -e MONGO_DB_NAME=quiz_db -e MONGO_DB_HOST=host.docker.internal -e MONGO_DB_PORT=27017 -e MONGO_DB_USERNAME= -e MONGO_DB_PASSWORD= -e BACKEND_PORT=8000 -p 8000:8000 -v "$(pwd)":/usr/src/app --network=bridge --name gameapi gameapi:latest

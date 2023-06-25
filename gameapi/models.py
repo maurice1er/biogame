@@ -42,6 +42,8 @@ class Question(Document):
 
 class Participant(Document):
     id = StringField(primary_key=True)
+    username = StringField(required=False)
+    profile = StringField(required=False)
     # is_blocked = BooleanField(default=False)
     # is_denied = BooleanField(default=False)
 
@@ -144,6 +146,8 @@ class QuestionUpdateModel(BaseModel):
 
 class ParticipantModel(BaseModel):
     id: str
+    username: Optional[str]
+    profile: Optional[str]
     # is_blocked: bool
     # is_denied: bool
 

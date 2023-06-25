@@ -1,0 +1,27 @@
+# Utilise l'image de base Ubuntu
+FROM ubuntu
+
+# Mise à jour des packages et installation de Python
+RUN apt-get update && apt-get install -y python3 python3-pip
+
+# Copie du fichier requirements.txt dans le conteneur
+COPY requirements.txt /app/requirements.txt
+
+# Définition du répertoire de travail
+WORKDIR /app
+
+# Installation des dépendances Python depuis le fichier requirements.txt
+RUN pip3 install -r requirements.txt
+
+# Copie du fichier init.sh dans le conteneur
+#COPY init.sh /app/init.sh
+COPY . .
+
+# Attribution des droits d'exécution au fichier init.sh
+RUN chmod +x /app/init.sh
+
+EXPOSE 8000 8527 50051
+
+# Exécution du script init.sh
+CMD ["/app/init.sh"]
+

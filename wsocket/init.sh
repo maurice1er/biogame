@@ -1,0 +1,1 @@
+docker rm -f wsocket && docker build -t wsocket . && docker run -itd -p 8527:8527 -v `pwd`:/usr/src/app -e BACKEND_ENDPOINT=http://host.docker.internal:8000 --network=bridge --name wsocket wsocket  

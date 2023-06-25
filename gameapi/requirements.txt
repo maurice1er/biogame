@@ -1,0 +1,15 @@
+email-validator==2.0.0.post2
+fastapi==0.95.2
+mongoengine==0.27.0
+pydantic==1.10.4
+pymongo==4.3.3
+# PyJWT==1.7.1
+# pypika-tortoise==0.1.6
+# python-dateutil==2.8.2
+# python-engineio==4.4.1
+python-dotenv==1.0.0
+python-multipart==0.0.6
+requests==2.28.1
+typing==3.7.4.3
+typing_extensions==4.4.0
+uvicorn==0.20.0
