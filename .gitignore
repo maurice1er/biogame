@@ -1,0 +1,28 @@
+# Dossiers à ignorer
+node_modules/
+logs/
+coverage/
+
+# Fichiers à ignorer
+*.log
+*.pid
+*.lock
+*.sqlite
+*.db
+*.DS_Store
+
+# Environnements spécifiques
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Dépendances de gestion de package
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnp
+.pnp.js
+.pnpm
+pnpm-debug.log
