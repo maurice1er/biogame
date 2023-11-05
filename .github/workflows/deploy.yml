@@ -34,10 +34,10 @@ jobs:
 
     - name: SSH into Lightsail instance and deploy
       run: |
+        touch myperm.pem
+        cat ${{ secrets.LIGHTSAIL_SSH_KEY }} >> myperm.pem
         pwd
-        # ls -la
-        # scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no -r . ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
-        ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la'
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
