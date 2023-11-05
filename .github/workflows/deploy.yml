@@ -39,6 +39,19 @@ jobs:
         RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
         JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
 
+
+    - name: Verify .env file content
+      run: |
+        cat .env
+      env:
+        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+        MONGODB_URI: ${{ secrets.APP_MONGODB_URI }}
+        PORT: ${{ secrets.APP_PORT }}
+        RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
+        JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
+
+
     - name: SSH into Lightsail instance and deploy
       run: |
         touch myperm.pem
