@@ -28,6 +28,7 @@ jobs:
     
     - name: Deploy to Lightsail
       run: |
+        ls -la
         ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> /home/bitnami/.ssh/known_hosts
         scp -r -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
       if: success()
