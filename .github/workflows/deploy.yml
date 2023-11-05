@@ -30,7 +30,7 @@ jobs:
         echo "MONGODB_URI=${{ secrets.APP_MONGODB_URI }}" >> ./.env
         echo "PORT=${{ secrets.APP_PORT }}" >> ./.env
         echo "RANDOM_QUESTIONS=${{ secrets.APP_RANDOM_QUESTIONS }}" >> ./.env
-        echo "JWT_SECRET=${{ secrets.APP_JWT_SECRET }}" >> ./.env
+        echo "JWT_TOKEN_SECRET=${{ secrets.APP_JWT_SECRET }}" >> ./.env
         scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./.env ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
         ls -la       
       env:
