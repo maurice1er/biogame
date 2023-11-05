@@ -12,6 +12,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Create known_hosts file
+      run: touch $HOME/.ssh/known_hosts
+
     - name: Install and configure AWS CLI
       run: |
         sudo apt-get update
@@ -22,17 +25,19 @@ jobs:
         aws --version
       shell: bash
 
+    - name: Add Lightsail instance to known_hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_IP_ADDRESS }} >> $HOME/.ssh/known_hosts
+
     - name: SSH into Lightsail instance and deploy
       run: |
         pwd
         ls -la
-        ssh-keyscan -H ${{ secrets.LIGHTSAIL_IP_ADDRESS }} >> ~/.ssh/known_hosts
         scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no -r . ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
         ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
-
 
 
 
