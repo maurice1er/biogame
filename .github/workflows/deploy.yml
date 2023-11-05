@@ -34,23 +34,10 @@ jobs:
         chmod 600 myperm.pem
         ls -la
         pwd
-        scp -i myperm.pem -r . ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+        scp -r ./ ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
         ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
 
-
-    # - name: SSH into Lightsail instance and deploy
-    #   run: |
-    #     touch myperm.pem
-    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-    #     chmod 600 myperm.pem
-    #     ls -la
-    #     pwd
-    #     scp -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
-    #     ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
-    #   env:
-    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
-    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
 
