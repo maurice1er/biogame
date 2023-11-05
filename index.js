@@ -6,15 +6,13 @@ dotenv.config();
 
 // const mongoose = require('mongoose');
 
-const { connectToDatabase, updateTopParticipants, getRandomQuestions, insertChallengeResponse, decodeJwtToken } = require('./functions');
+const { connectToDatabase, updateTopParticipants, getRandomQuestions, insertChallengeResponse, decodeJwtToken, updateAvailableChallenges } = require('./functions');
 
 // const { v4: uuidv4 } = require('uuid');
 const { Participant, Question, Score, Challenge, ChallengeResponse } = require("./models.js");
 
 console.log(process.env.NODE_ENV);
 console.log(process.env.MONGODB_URI);
-
-
 
 
 
@@ -45,7 +43,7 @@ const wss = new WebSocket.Server({ noServer: true });
 
 // socket
 
-wss.on('top-participants', async (ws, req) => {
+wss.on('topParticipants', async (ws, req) => {
     console.log('Nouvelle connexion WebSocket établie --> top-participants.');
 
     const tokenHeader = req.headers.authorization;
@@ -77,8 +75,9 @@ wss.on('top-participants', async (ws, req) => {
     // Fonction pour envoyer les meilleurs participants aux clients
     const sendTopParticipants = async () => {
         try {
-            const topParticipants = await updateTopParticipants();
-            ws.send(JSON.stringify(topParticipants));
+            const topParticipants = await updateTopParticipants(); // topParticipants.sort((a, b) => b['score'].compareTo(a['score']));
+
+            ws.send(JSON.stringify({participants: topParticipants}));
         } catch (error) {
             console.error("Erreur lors de la récupération des meilleurs participants :", error);
         }
@@ -87,7 +86,6 @@ wss.on('top-participants', async (ws, req) => {
     setInterval(sendTopParticipants, 5000);
 
 });
-
 
 wss.on('clean', async (ws) => {
     console.log('Nouvelle connexion WebSocket établie.');
@@ -128,7 +126,6 @@ wss.on('challenges', async (ws, req) => {
         return;
     };
 
-
     if (!userInfo.permissions || (!userInfo.permissions.includes("canListChallenges") && !userInfo.permissions.includes("*"))) {
         console.log("pas de permission");
         ws.close(1003, 'Forbidden'); // Code 1003 pour interdit
@@ -136,27 +133,34 @@ wss.on('challenges', async (ws, req) => {
     }
 
     let participantId = userInfo.id;
-    // let participantUsername = userInfo.username;
-    // let participantProfile = userInfo.profile;
-    // console.log(participantId);
-
-
-    // Gestion des messages entrants
-    ws.on('message', async (message) => {
-        // Traitement des réponses du participant ici...
-        console.log(JSON.parse(message));
-
-
-        // Recherchez le challenge en fonction de son ID, en excluant les challenges créés par le participant
-        const challenges = await Challenge.find({ challenger: { $ne: participantId } });
-
-        ws.send(JSON.stringify(challenges));
-    });
 
     ws.on('close', () => {
         console.log('Connexion WebSocket fermée.');
+        return;
+        // Ajoutez ici le code pour fermer la connexion à la base de données MongoDB si nécessaire
+        // Par exemple : mongoose.connection.close();
     });
+
+    // Fonction pour envoyer les meilleurs participants aux clients
+    const sendAvailableChallenges = async () => {
+        try {
+            const challenges = await updateAvailableChallenges();
+            console.log(challenges);
+
+            ws.send(JSON.stringify({challenges: challenges}));
+        } catch (error) {
+            // Gérez les erreurs ici, par exemple, fermez la connexion WebSocket en cas d'erreur
+            console.error('Erreur lors de l\'envoi des challenges:', error);
+            ws.close(1011, 'Internal Error'); // Code 1011 pour erreur interne
+        }
+    };
+
+    setInterval(sendAvailableChallenges, 5000);
+
 });
+
+
+
 
 
 wss.on('start', async (ws, req) => {
@@ -260,7 +264,7 @@ wss.on('start', async (ws, req) => {
     function sendQuestion(ws, index) {
         const question = questions[index];
         if (question) {
-            ws.send(JSON.stringify(question)); // question au format JSON
+            ws.send(JSON.stringify({question: question})); // question au format JSON
         }
     }
 
@@ -277,53 +281,62 @@ wss.on('start', async (ws, req) => {
 
     // Gestion des messages entrants
     ws.on('message', async (message) => {
-        // Traitement des réponses du participant ici...
-        console.log(JSON.parse(message));
+        try {
+            // Traitement des réponses du participant ici...
+            // console.log(JSON.parse(message));
 
-        // Convertissez la réponse du participant en un objet JavaScript
-        const participantResponse = JSON.parse(message);
+            // Convertissez la réponse du participant en un objet JavaScript
+            const participantResponse = JSON.parse(message);
 
-        // Obtenez la question actuelle
-        const currentQuestion = questions[currentQuestionIndex];
-        // console.log(currentQuestion.answer + " = " + participantResponse.answer);
+            // Obtenez la question actuelle
+            const currentQuestion = questions[currentQuestionIndex];
+            // console.log(currentQuestion.answer + " = " + participantResponse.answer);
 
-        // Vérifiez si la réponse du participant correspond à la réponse correcte de la question
-        let isCorrect = participantResponse.answer === currentQuestion.answer;
-        insertChallengeResponse(challengeSaved._id, participantId, currentQuestion._id, participantResponse, isCorrect);
+            if (currentQuestion && participantResponse && participantResponse.answer !== undefined) {
+                // Vérifiez si la réponse du participant correspond à la réponse correcte de la question
+                let isCorrect = participantResponse && participantResponse.answer === currentQuestion.answer;
+                insertChallengeResponse(challengeSaved._id, participantId, currentQuestion._id, participantResponse, isCorrect);
+            
+                if (isCorrect) {
+                    // La réponse est correcte, vous pouvez prendre des mesures ici
 
+                    if (challengeSaved.challenger && challengeSaved.challenger === participantId) {
+                        // Le participant est le challenger, augmentez son score de 10 points
+                        challengeSaved.challenger_score += 10;
+                        await challengeSaved.save();
 
-        if (isCorrect) {
-            // La réponse est correcte, vous pouvez prendre des mesures ici
+                        score.score += 10;
+                        await score.save();
 
-            if (challengeSaved.challenger && challengeSaved.challenger === participantId) {
-                // Le participant est le challenger, augmentez son score de 10 points
-                challengeSaved.challenger_score += 10;
-                await challengeSaved.save();
+                        console.log('Réponse correcte !');
+                    }
 
-                score.score += 10;
-                await score.save();
+                } else {
+                    // La réponse est incorrecte, vous pouvez prendre des mesures ici
+                    console.log('Réponse incorrecte.');
+                }
 
-                console.log('Réponse correcte !');
+                // Passez à la question suivante
+                currentQuestionIndex++;
+
+                
+                if (currentQuestionIndex >= questions.length) {
+
+                    ws.send(JSON.stringify({ end: { status: true, challengeId: challengeSaved._id } }));            
+                    ws.close();
+                }
+                // Vérifiez si toutes les questions ont été envoyées
+                sendQuestion(ws, currentQuestionIndex);
+                
+            } else {
+                // participantResponse n'est pas défini ou ne contient pas la propriété 'answer'
+                console.error("Réponse du participant invalide.");
+                ws.close();
             }
-
-        } else {
-            // La réponse est incorrecte, vous pouvez prendre des mesures ici
-            console.log('Réponse incorrecte.');
-        }
-
-
-
-        // Passez à la question suivante
-        currentQuestionIndex++;
-
-        // Vérifiez si toutes les questions ont été envoyées
-        if (currentQuestionIndex < questions.length) {
-            sendQuestion(ws, currentQuestionIndex);
-        } else {
-            // Toutes les questions ont été envoyées, vous pouvez informer le participant que le jeu est terminé.
-            ws.send(JSON.stringify({ message: 'Le jeu est terminé. Merci de jouer !' }));
-            ws.close();
-        }
+    } catch (error) {
+        console.error("Erreur lors du traitement du message WebSocket :", error);
+        ws.close();
+    }
     });
 
     ws.on('close', () => {
@@ -358,8 +371,15 @@ wss.on('accept', async (ws, req) => {
     let participantId = userInfo.id;
     let participantUsername = userInfo.username;
     let participantProfile = userInfo.profile;
-
     // console.log(participantId);
+
+
+
+    
+    // Initialisez l'index de la question actuelle à zéro
+    let currentQuestionIndex = 0;
+    let questions = [];
+
 
     // si le challengé n'existe pas dans Participant le crée sinon le mettre à jour
     const challenged = await Participant.findOne({ _id: participantId });
@@ -380,9 +400,6 @@ wss.on('accept', async (ws, req) => {
         );
     }
 
-    // Initialisez l'index de la question actuelle à zéro
-    let currentQuestionIndex = 0;
-    let questions = [];
 
     // Gestion des messages entrants
     ws.on('message', async (message) => {
@@ -413,7 +430,8 @@ wss.on('accept', async (ws, req) => {
                     function sendQuestion(ws, index) {
                         const question = questions[index];
                         if (question) {
-                            ws.send(JSON.stringify(question)); // question au format JSON
+                            // ws.send(JSON.stringify(question)); // question au format JSON
+                            ws.send(JSON.stringify({question: question})); // question au format JSON
                         }
                     }
                     // Commencez par envoyer la première question
@@ -462,37 +480,49 @@ wss.on('accept', async (ws, req) => {
                         // Passez à la question suivante
                         currentQuestionIndex++;
 
-                        // Vérifiez si toutes les questions ont été envoyées
-                        if (currentQuestionIndex < questions.length) {
-                            sendQuestion(ws, currentQuestionIndex);
+                        // sendQuestion(ws, currentQuestionIndex);
+
+                        if (challenge.challenger_score > challenge.challenged_score) {
+                            challenge.winner = challenge.challenger;
                         } else {
-                            if (challenge.challenger_score > challenge.challenged_score) {
-                                challenge.winner = challenge.challenger;
-                            } else {
-                                challenge.winner = challenge.challenged;
-                            }
+                            challenge.winner = challenge.challenged;
+                        }
+                        await challenge.save();
+                
+                        if (currentQuestionIndex >= questions.length) {
+                            // ended
                             challenge.is_ended = true;
                             await challenge.save();
 
-                            // Toutes les questions ont été envoyées, vous pouvez informer le participant que le jeu est terminé.
-                            ws.send(JSON.stringify({ message: 'Le jeu est terminé. Merci de jouer !' }));
+                            ws.send(JSON.stringify({ end: { status: true, challengeId: challenge._id } }));            
                             ws.close();
                         }
+                        // Vérifiez si toutes les questions ont été envoyées
+                        sendQuestion(ws, currentQuestionIndex);
+
+                        // // Vérifiez si toutes les questions ont été envoyées
+                        // if (currentQuestionIndex < questions.length) {
+                        //     sendQuestion(ws, currentQuestionIndex);
+                        // } else {
+
+
+                            // // Toutes les questions ont été envoyées, vous pouvez informer le participant que le jeu est terminé.
+                            // ws.send(JSON.stringify({ message: 'Le jeu est terminé. Merci de jouer !' }));
+                            // ws.close();
+
+                        // }
                     });
                 } else {
                     // Si le challenge n'existe pas, envoyez un message d'erreur
                     ws.send(JSON.stringify({ error: 'Challenge not found' }));
                 }
             }
-            // else {
-            //     console.error("error challengeId");
-            // }
+            
         } catch (error) {
             console.error('Erreur de traitement du message :', error);
         }
     });
 });
-
 
 
 
@@ -502,7 +532,7 @@ server.on('upgrade', (request, socket, head) => {
 
     if (request.url === '/top-participants') {
         wss.handleUpgrade(request, socket, head, (ws) => {
-            wss.emit('top-participants', ws, request);
+            wss.emit('topParticipants', ws, request);
         });
     } else if (request.url === '/available-challenges') {
         wss.handleUpgrade(request, socket, head, (ws) => {
@@ -531,7 +561,7 @@ server.on('upgrade', (request, socket, head) => {
 // run server
 
 server.listen(port, () => {
-    console.log("Serveur WebSocket écoutant sur le port ${port}");
+    console.log('Serveur WebSocket écoutant sur le port ${port}');
 });
 
 
