@@ -28,16 +28,16 @@ jobs:
         aws --version
       shell: bash
 
-    - name: Add Lightsail instance to known_hosts
-      run: |
-        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> $HOME/.ssh/known_hosts
+    # - name: Add Lightsail instance to known_hosts
+    #   run: |
+    #     ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> $HOME/.ssh/known_hosts
 
     - name: SSH into Lightsail instance and deploy
       run: |
         pwd
-        ls -la
-        scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no -r . ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
-        ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
+        # ls -la
+        # scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no -r . ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
+        ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
