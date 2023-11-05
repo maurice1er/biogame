@@ -8,31 +8,75 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Install AWS CLI
-        run: |
-          # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          # unzip awscliv2.zip
-          # sudo ./aws/install
-          aws --version
-        if: success()
+    - name: Install AWS CLI
+      run: |
+        # sudo apt-get install -y python3-pip
+        # pip3 install awscli --upgrade --user
+        # echo 'export PATH=$HOME/.local/bin:$PATH' >> $HOME/.profile
+        # source $HOME/.profile
+        aws --version
+      shell: bash
 
-      - name: Configure AWS credentials
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set region eu-west-3
-        if: success()
+    - name: Configure AWS credentials
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set region us-east-1 # Remplacez 'us-east-1' par votre région AWS
+      env:
+        AWS_DEFAULT_REGION: us-east-1 # Remplacez 'us-east-1' par votre région AWS
 
-      - name: Deploy to Lightsail
-        run: |
-          # mkdir -p ~/.ssh
-          # echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          # chmod 600 ~/.ssh/id_rsa
-          # ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> ~/.ssh/known_hosts
-          scp -r -i ~/.ssh/id_rsa ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
-        if: success() 
+    - name: SSH into Lightsail instance and deploy
+      run: |
+        chmod 400 lightsail-key.pem
+        scp -i lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:~/app
+        ssh -i lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd ~/app && npm install && npm start'
+      env:
+        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
+        NODE_ENV: production # Réglez l'environnement Node.js selon votre besoin (production, staging, etc.)
+
+
+
+
+# name: Deploy to AWS Lightsail
+
+# on:
+#   push:
+#     branches:
+#       - dev
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Install AWS CLI
+#         run: |
+#           # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+#           # unzip awscliv2.zip
+#           # sudo ./aws/install
+#           aws --version
+#         if: success()
+
+#       - name: Configure AWS credentials
+#         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set region eu-west-3
+#         if: success()
+
+#       - name: Deploy to Lightsail
+#         run: |
+#           # mkdir -p ~/.ssh
+#           # echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+#           # chmod 600 ~/.ssh/id_rsa
+#           ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> /home/bitnami/.ssh/known_hosts
+#           scp -r -i ~/.ssh/id_rsa ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
+#         if: success() 
 
 
 
