@@ -31,7 +31,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> ~/.ssh/known_hosts
-          scp -r -i ~/.ssh/id_rsa ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/path/to/your/app
+          scp -r -i ~/.ssh/id_rsa ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
         if: success()
 
 
