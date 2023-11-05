@@ -33,7 +33,7 @@ jobs:
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
         pwd
-        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la'
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la plantio'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
