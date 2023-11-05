@@ -37,7 +37,7 @@ jobs:
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
-        NODE_ENV: production # Réglez l'environnement Node.js selon votre besoin (production, staging, etc.)
+        NODE_ENV: production # (production, staging, etc.)
 
 
 
