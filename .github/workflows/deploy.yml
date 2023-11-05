@@ -25,15 +25,15 @@ jobs:
       run: |
         aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws configure set region us-east-1 # Remplacez 'us-east-1' par votre région AWS
+        aws configure set region eu-west-3
       env:
-        AWS_DEFAULT_REGION: us-east-1 # Remplacez 'us-east-1' par votre région AWS
+        AWS_DEFAULT_REGION: eu-west-3
 
     - name: SSH into Lightsail instance and deploy
       run: |
-        chmod 400 lightsail-key.pem
-        scp -i lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:~/app
-        ssh -i lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd ~/app && npm install && npm start'
+        chmod 400 /home/bitnami/.ssh/lightsail-key.pem
+        scp -i /home/bitnami/.ssh/lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+        ssh -i /home/bitnami/.ssh/lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
