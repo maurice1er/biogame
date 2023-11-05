@@ -29,17 +29,28 @@ jobs:
       env:
         AWS_DEFAULT_REGION: eu-west-3
 
+    # - name: SSH into Lightsail instance and deploy
+    #   run: |
+    #     pwd
+    #     ls -la /home/runner
+    #     # chmod 400 /home/bitnami/.ssh/lightsail-key
+    #     # scp -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+    #     # ssh -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
+    #   env:
+    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+    #     LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
+    #     NODE_ENV: production # (production, staging, etc.)
+
     - name: SSH into Lightsail instance and deploy
       run: |
         pwd
-        ls -la /home/runner
-        # chmod 400 /home/bitnami/.ssh/lightsail-key
-        # scp -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
-        # ssh -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
+        ls -la
+        ssh -i /home/runner/.ssh/lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
         NODE_ENV: production # (production, staging, etc.)
+
 
 
 
