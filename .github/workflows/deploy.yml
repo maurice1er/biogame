@@ -25,13 +25,13 @@ jobs:
       run: |
         ls -la
         pwd
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./* ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./* ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio/biogame
         touch ./.env
         echo "MONGODB_URI=${{ secrets.APP_MONGODB_URI }}" >> ./.env
         echo "PORT=${{ secrets.APP_PORT }}" >> ./.env
         echo "RANDOM_QUESTIONS=${{ secrets.APP_RANDOM_QUESTIONS }}" >> ./.env
         echo "JWT_TOKEN_SECRET=${{ secrets.APP_JWT_SECRET }}" >> ./.env
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./.env ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./.env ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio/biogame
         ls -la       
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
@@ -48,8 +48,8 @@ jobs:
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
-        # ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start > /dev/null 2>&1 &'
-        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && nohup npm start > /dev/null 2>&1 &'
+        # ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && npm install && npm start > /dev/null 2>&1 &'
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && npm install && nohup npm start > /dev/null 2>&1 &'
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
