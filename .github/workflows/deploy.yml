@@ -1,3 +1,4 @@
+
 name: Deploy to AWS Lightsail
 
 on:
@@ -38,7 +39,6 @@ jobs:
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
-
 
 
 
