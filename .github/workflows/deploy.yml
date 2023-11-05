@@ -12,12 +12,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Create SSH directory
-      run: mkdir -p $HOME/.ssh
-
-    - name: Create known_hosts file
-      run: touch $HOME/.ssh/known_hosts
-
     - name: Install and configure AWS CLI
       run: |
         sudo apt-get update
@@ -28,14 +22,11 @@ jobs:
         aws --version
       shell: bash
 
-    # - name: Add Lightsail instance to known_hosts
-    #   run: |
-    #     ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> $HOME/.ssh/known_hosts
-
     - name: SSH into Lightsail instance and deploy
       run: |
         touch myperm.pem
-        cat ${{ secrets.LIGHTSAIL_SSH_KEY }} >> myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
         pwd
         ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la'
       env:
