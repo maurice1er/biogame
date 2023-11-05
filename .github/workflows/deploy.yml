@@ -12,16 +12,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # - name: Install and configure AWS CLI
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -y awscli
-    #     aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     aws configure set region eu-west-3
-    #     aws --version
-    #   shell: bash
-
     - name: Set up SSH
       run: |
         mkdir -p ~/.ssh/
@@ -37,30 +27,27 @@ jobs:
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
 
-    # - name: Add Lightsail IP to known_hosts and copie folder to Lightsail instance
-    #   run: |
-    #     mkdir -p $HOME/.ssh
-    #     ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} > $HOME/.ssh/known_hosts
-    #     touch myperm.pem
-    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-    #     chmod 600 myperm.pem
-    #     ls -la
-    #     pwd
-    #     scp -r ./ ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
-    #   env:
-    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
-    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
-
-    - name: Add Lightsail IP to known_hosts and SSH into Lightsail instance and deploy
+    - name: SSH into Lightsail instance and deploy
       run: |
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
+        cd /home/bitnami/plantio
+        touch .env
+        echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+        echo "PORT=${{ secrets.PORT }}" >> .env
+        echo "RANDOM_QUESTIONS=${{ secrets.RANDOM_QUESTIONS }}" >> .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
         ls -la
         pwd
-        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'npm install && npm start'
       env:
+        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+        MONGODB_URI: ${{ secrets.APP_MONGODB_URI }}
+        PORT: ${{ secrets.APP_PORT }}
+        RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
+        JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
 
 
