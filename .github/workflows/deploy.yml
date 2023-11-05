@@ -29,5 +29,5 @@ jobs:
     - name: Deploy to Lightsail
       run: |
         ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> ~/.ssh/known_hosts
-        scp -r -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/plantio/biogame
+        scp -r -i ${{ secrets.SSH_PRIVATE_KEY_PATH }} ./ user@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
       if: success()
