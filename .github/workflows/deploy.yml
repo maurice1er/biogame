@@ -32,6 +32,7 @@ jobs:
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
+        ls -la
         pwd
         ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'pwd && ls -la plantio'
       env:
