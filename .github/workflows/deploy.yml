@@ -44,6 +44,7 @@ jobs:
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
+        cat .env
         pwd
         ls -la
         pwd
