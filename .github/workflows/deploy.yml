@@ -22,19 +22,29 @@ jobs:
         aws --version
       shell: bash
 
-    - name: Add Lightsail IP to known_hosts
+    - name: Add Lightsail IP to known_hosts and copie folder to Lightsail instance
       run: |
         mkdir -p $HOME/.ssh
-        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> $HOME/.ssh/known_hosts
-
-    - name: SSH into Lightsail instance and deploy
-      run: |
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} > $HOME/.ssh/known_hosts
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
         ls -la
         pwd
         scp -r ./ ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+      env:
+        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+
+    - name: Add Lightsail IP to known_hosts and SSH into Lightsail instance and deploy
+      run: |
+        mkdir -p $HOME/.ssh
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} > $HOME/.ssh/known_hosts
+        touch myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
+        ls -la
+        pwd
         ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
