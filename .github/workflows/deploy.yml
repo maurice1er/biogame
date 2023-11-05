@@ -42,7 +42,7 @@ jobs:
 
     - name: Verify .env file content
       run: |
-        echo ${{ secrets.LIGHTSAIL_USERNAME }}
+        echo "${{ secrets.LIGHTSAIL_USERNAME }}"
         cat .env
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
