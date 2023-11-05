@@ -13,6 +13,7 @@ const { Participant, Question, Score, Challenge, ChallengeResponse } = require("
 
 console.log(process.env.NODE_ENV);
 console.log(process.env.MONGODB_URI);
+console.log(process.env.JWT_TOKEN_SECRET);
 
 
 
