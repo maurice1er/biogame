@@ -31,9 +31,9 @@ jobs:
 
     - name: SSH into Lightsail instance and deploy
       run: |
-        chmod 400 /home/bitnami/.ssh/lightsail-key.pem
-        scp -i /home/bitnami/.ssh/lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
-        ssh -i /home/bitnami/.ssh/lightsail-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
+        chmod 400 /home/bitnami/.ssh/lightsail-key
+        scp -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+        ssh -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
