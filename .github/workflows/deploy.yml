@@ -12,34 +12,46 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install and configure AWS CLI
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y awscli
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws configure set region eu-west-3
-        aws --version
-      shell: bash
+    # - name: Install and configure AWS CLI
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y awscli
+    #     aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     aws configure set region eu-west-3
+    #     aws --version
+    #   shell: bash
 
-    - name: Add Lightsail IP to known_hosts and copie folder to Lightsail instance
+    - name: Set up SSH
       run: |
-        mkdir -p $HOME/.ssh
-        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} > $HOME/.ssh/known_hosts
-        touch myperm.pem
-        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-        chmod 600 myperm.pem
-        ls -la
-        pwd
-        scp -r ./ ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> ~/.ssh/known_hosts
       env:
-        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
-        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+    - name: Copy files to Lightsail instance
+      run: |
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./* ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
+      env:
+        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+    # - name: Add Lightsail IP to known_hosts and copie folder to Lightsail instance
+    #   run: |
+    #     mkdir -p $HOME/.ssh
+    #     ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} > $HOME/.ssh/known_hosts
+    #     touch myperm.pem
+    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+    #     chmod 600 myperm.pem
+    #     ls -la
+    #     pwd
+    #     scp -r ./ ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+    #   env:
+    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
 
     - name: Add Lightsail IP to known_hosts and SSH into Lightsail instance and deploy
       run: |
-        mkdir -p $HOME/.ssh
-        ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} > $HOME/.ssh/known_hosts
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
