@@ -23,25 +23,13 @@ jobs:
 
     - name: Copy files to Lightsail instance
       run: |
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./* ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
-      env:
-        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-
-    - name: SSH into Lightsail instance and deploy
-      run: |
-        touch myperm.pem
-        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-        chmod 600 myperm.pem
-        pwd
         ls -la
         touch .env
         echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
         echo "PORT=${{ secrets.PORT }}" >> .env
         echo "RANDOM_QUESTIONS=${{ secrets.RANDOM_QUESTIONS }}" >> .env
         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-        ls -la
-        pwd
-        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./* ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }}:/home/bitnami/plantio
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
@@ -50,5 +38,19 @@ jobs:
         PORT: ${{ secrets.APP_PORT }}
         RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
         JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
+
+    - name: SSH into Lightsail instance and deploy
+      run: |
+        touch myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
+        pwd
+        ls -la
+        pwd
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio && npm install && npm start'
+      env:
+        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
 
 
