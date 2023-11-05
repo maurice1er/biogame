@@ -12,32 +12,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install AWS CLI
+    - name: Install and configure AWS CLI
       run: |
-        # sudo apt-get install -y python3-pip
-        # pip3 install awscli --upgrade --user
-        # echo 'export PATH=$HOME/.local/bin:$PATH' >> $HOME/.profile
-        # source $HOME/.profile
-        aws --version
-      shell: bash
-
-    - name: Configure AWS credentials
-      run: |
+        sudo apt-get update
+        sudo apt-get install -y awscli
         aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws configure set region eu-west-3
-      env:
-        AWS_DEFAULT_REGION: eu-west-3
+        aws --version
+      shell: bash
 
     - name: SSH into Lightsail instance and deploy
       run: |
         pwd
         ls -la
-        ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
+        ssh-keyscan -H ${{ secrets.LIGHTSAIL_IP_ADDRESS }} >> ~/.ssh/known_hosts
+        scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no -r . ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
+        ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
       env:
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
         LIGHTSAIL_IP_ADDRESS: ${{ secrets.LIGHTSAIL_IP_ADDRESS }}
-        NODE_ENV: production
+
 
 
 
