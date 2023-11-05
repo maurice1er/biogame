@@ -33,6 +33,7 @@ jobs:
       run: |
         pwd
         ls -la
+        cd /home/bitnami
         chmod 400 /home/bitnami/.ssh/lightsail-key
         scp -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }}:/home/bitnami/plantio
         ssh -i /home/bitnami/.ssh/lightsail-key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_IP_ADDRESS }} 'cd /home/bitnami/plantio && npm install && npm start'
