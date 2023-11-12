@@ -43,6 +43,26 @@ jobs:
         APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
 
 
+    - name: Kill old proccess on same port
+      run: |
+        touch myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
+        #
+        BIOGAME_PID=$(ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'lsof -t -i :${{ secrets.APP_PORT }}')
+        #
+        if [ -n "$BIOGAME_PID" ]; then
+          echo "Killing process on port ${{ secrets.APP_PORT }} (BIOGAME_PID: $BIOGAME_PID)"
+          ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} "kill -9 $BIOGAME_PID"
+        else
+          echo "No process found on port ${{ secrets.APP_PORT }}"
+        fi
+      env:
+        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+
+
     - name: SSH into Lightsail instance and deploy
       run: |
         touch myperm.pem
