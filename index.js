@@ -145,7 +145,8 @@ wss.on('challenges', async (ws, req) => {
     // Fonction pour envoyer les meilleurs participants aux clients
     const sendAvailableChallenges = async () => {
         try {
-            const challenges = await updateAvailableChallenges();
+            const challenges = await updateAvailableChallenges(participantId);
+
             console.log(challenges);
 
             ws.send(JSON.stringify({challenges: challenges}));

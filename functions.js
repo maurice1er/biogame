@@ -215,14 +215,15 @@ const updateAvailableChallenges = async () => {
 };
 */
 
-const updateAvailableChallenges = async () => {
+const updateAvailableChallenges = async (challengerId) => {
     try {
         // Effectuer la jointure et filtrer les challenges selon les critères
         const challenges = await Challenge.aggregate([
             {
                 $match: {
                     is_ended: false,
-                    accepted_date: { $exists: false } // Assurez-vous que la date d'acceptation existe
+                    accepted_date: { $exists: false }, // Assurez-vous que la date d'acceptation existe
+                    challenger: { $ne: challengerId }, // Exclure les challenges créés par le challenger lui-même
                 }
             },
             {
