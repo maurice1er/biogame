@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed:questions": "node seeders/questionSeeder.js",
+    "db:clean": "node seeders/dbclean.js",
+    "db:seed": "node seeders/dbclean.js; node seeders/questionSeeder.js; node seeders/challengeSedder.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

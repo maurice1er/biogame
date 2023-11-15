@@ -17,6 +17,9 @@ const questionSchema = new mongoose.Schema({
     created_at: { type: Date, default: Date.now },
     modified_at: { type: Date, default: Date.now },
     is_enable: { type: Boolean, default: true },
+    category: { type: String },
+    tags: [String],
+    difficulty: { type: Number, default: 1 }
 });
 
 // Création du modèle de question

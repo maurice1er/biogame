@@ -169,3 +169,7 @@ const scoresData = [
   }
   
 seedData();
+
+// Appelez la fonction pour nettoyer la base de données
+//clearDatabase();
+  
