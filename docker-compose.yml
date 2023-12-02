@@ -8,8 +8,6 @@ services:
     container_name: websocket
     ports:
       - "8080:3000"
-    volumes:
-      - "./:/usr/src/app"
     env_file:
       - .env
     networks:
