@@ -581,10 +581,10 @@ const consulClient = new Consul({ host: consulIp, port: consulPort });
 consulClient.agent.service.register({
     name: 'WebSocket_Challenge',
     address: 'host.docker.internal',
-    port: 1111,
+    port: 8080,
     tags: ['backend', 'websocket'],
     checks: [{
-        http: `http://localhost:3000/health`,
+        http: `host.docker.internal:8080/health`,
         interval: '5s'
     }]
 });
