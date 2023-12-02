@@ -580,11 +580,11 @@ server.on('upgrade', (request, socket, head) => {
 const consulClient = new Consul({ host: consulIp, port: consulPort });
 consulClient.agent.service.register({
     name: 'WebSocket_Challenge',
-    address: 'host.docker.internal',
-    port: 8080,
+    address: 'localhost',
+    port: 3000,
     tags: ['backend', 'websocket'],
     checks: [{
-        http: `host.docker.internal:8080/health`,
+        http: `http://websocket:3000/health`,
         interval: '5s'
     }]
 });
@@ -592,7 +592,7 @@ consulClient.agent.service.register({
 
 // run server
 
-server.listen(port, () => {
+server.listen(3000, () => {
     console.log(`Serveur WebSocket écoutant sur le port ${port}`);
 });
 

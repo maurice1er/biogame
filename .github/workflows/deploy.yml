@@ -45,21 +45,26 @@ jobs:
         APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
         APP_CONSUL_IP: ${{ secrets.APP_CONSUL_IP }}
         APP_CONSUL_PORT: ${{ secrets.APP_CONSUL_PORT }}
+    
+    - name: Delete Docker dangling image
+      run: |
+        touch myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'docker rmi $(sudo docker images -f "dangling=true" -q)'
+      env:
+        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+        APP_MONGODB_URI: ${{ secrets.APP_MONGODB_URI }}
+        APP_PORT: ${{ secrets.APP_PORT }}
+        APP_RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
+        APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
+
+    
 
 
-    # - name: Kill old proccess on same port
-    #   run: |
-    #     touch myperm.pem
-    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-    #     chmod 600 myperm.pem
-    #     ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} "docker-compose down"
-    #   env:
-    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
-    #     LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
-
-
-    - name: Build Docker container on Lightsail
+    - name: Build and Deploy Docker container on Lightsail
       run: |
         touch myperm.pem
         echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
