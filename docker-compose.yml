@@ -17,5 +17,7 @@ services:
       - consul
 
 networks:
+  consul:
+    external: true
   websocket:
     driver: bridge
