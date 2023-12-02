@@ -59,31 +59,12 @@ jobs:
     #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
 
 
-    # - name: SSH into Lightsail instance and deploy
-    #   run: |
-    #     touch myperm.pem
-    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-    #     chmod 600 myperm.pem
-    #     # ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && npm install && npm start > /dev/null 2>&1 &'
-    #     ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && npm install && nohup npm start > /dev/null 2>&1 &'
-    #   env:
-    #     LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
-    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
-    #     APP_MONGODB_URI: ${{ secrets.APP_MONGODB_URI }}
-    #     APP_PORT: ${{ secrets.APP_PORT }}
-    #     APP_RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
-    #     APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
-
-
     - name: Build Docker container on Lightsail
       run: |
-        # touch myperm.pem
-        # echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-        # chmod 600 myperm.pem
-        # ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && npm install && npm start > /dev/null 2>&1 &'
-        # ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && npm install && nohup npm start > /dev/null 2>&1 &'
-        ssh -i ~/.ssh/id_rsa ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && docker-compose down && docker-compose up -d --build'
+        touch myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
+        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && docker-compose down && docker-compose up -d --build'
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}

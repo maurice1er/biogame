@@ -21,10 +21,19 @@ console.log(process.env.CONSUL_IP);
 console.log(process.env.CONSUL_PORT);
 
 
+// const server = http.createServer((req, res) => {
+//     res.writeHead(200, { 'Content-Type': 'text/plain' });
+//     res.end('Serveur WebSocket en cours d\'exécution');
+// });
 
 const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Serveur WebSocket en cours d\'exécution');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+
+    const jsonResponse = {
+        message: 'Serveur WebSocket en cours d\'exécution',
+        status: 'OK'
+    };
+    res.end(JSON.stringify(jsonResponse));
 });
 
 // env
@@ -566,37 +575,6 @@ server.on('upgrade', (request, socket, head) => {
 });
 
 
-
-
-// Health check endpoint for WebSocket
-server.on('/health', (req, res) => {
-    const isWebSocketHealthy = checkWebSocketHealth();
-  
-    // Renvoyer le statut approprié
-    const status = isWebSocketHealthy ? 200 : 500;
-  
-    res.writeHead(status, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'WebSocket Health', status: isWebSocketHealthy }));
-});
-  
-  // Vérification de l'état de santé du WebSocket
-  function checkWebSocketHealth() {
-    const ws = new WebSocket(`ws://localhost:${port}`);
-
-    return new Promise((resolve) => {
-        ws.on('open', () => {
-            ws.close();
-            resolve(true);
-        });
-  
-        ws.on('error', (error) => {
-            ws.close();
-            resolve(false);
-        });
-    });
-}
-
-
 // Register service with Consul
 // const consulClient = new Consul(); 
 const consulClient = new Consul({ host: consulIp, port: consulPort });
@@ -606,7 +584,7 @@ consulClient.agent.service.register({
     port: 1111,
     tags: ['backend', 'websocket'],
     checks: [{
-        http: `http://host.docker.internal:1111/api/status`,
+        http: `http://localhost:3000/health`,
         interval: '5s'
     }]
 });
