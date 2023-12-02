@@ -47,16 +47,16 @@ jobs:
         APP_CONSUL_PORT: ${{ secrets.APP_CONSUL_PORT }}
 
 
-    - name: Kill old proccess on same port
-      run: |
-        touch myperm.pem
-        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-        chmod 600 myperm.pem
-        ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} "docker-compose down"
-      env:
-        LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
-        LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-        LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+    # - name: Kill old proccess on same port
+    #   run: |
+    #     touch myperm.pem
+    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+    #     chmod 600 myperm.pem
+    #     ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} "docker-compose down"
+    #   env:
+    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+    #     LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
 
 
     # - name: SSH into Lightsail instance and deploy
