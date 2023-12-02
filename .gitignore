@@ -16,6 +16,8 @@ jest-html-reporters-attach/
 
 *-report.html
 
+Dockerfile.dev
+
 # Environnements spécifiques
 .env
 .env.local

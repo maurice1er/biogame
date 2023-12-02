@@ -6,7 +6,7 @@ dotenv.config();
 const { connectToDatabase, decodeJwtToken, getRandomQuestions, insertChallengeResponse } = require('../functions.js');
 const { Question, Challenge, Participant, ChallengeResponse } = require('../models.js');
 
-const connectionString = process.env.MONGODB_TEST_URI;
+const connectionString = process.env.MONGODB_URI;
 
 beforeAll(async () => {
   await connectToDatabase(connectionString);

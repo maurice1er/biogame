@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: websocket
+    ports:
+      - "8080:3000"
+    volumes:
+      - "./:/usr/src/app"
+    env_file:
+      - .env
+    networks:
+      - websocket
+      - consul
+
+networks:
+  websocket:
+    driver: bridge

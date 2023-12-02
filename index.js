@@ -17,6 +17,9 @@ console.log(process.env.NODE_ENV);
 console.log(process.env.MONGODB_URI);
 console.log(process.env.JWT_TOKEN_SECRET);
 
+console.log(process.env.CONSUL_IP);
+console.log(process.env.CONSUL_PORT);
+
 
 
 const server = http.createServer((req, res) => {
@@ -32,6 +35,8 @@ const jwtTokenSecret = process.env.JWT_TOKEN_SECRET;
 const randomQuestions = Number(process.env.RANDOM_QUESTIONS) || 1;
 const questionDefaultLanguague = process.env.QUESTION_DEFAULT_LANGUAGUE || 'fr';
 
+const consulIp = process.env.CONSUL_IP || "localhost";
+const consulPort = Number(process.env.CONSUL_PORT) || 8500;
 
 
 
@@ -593,16 +598,16 @@ server.on('/health', (req, res) => {
 
 
 // Register service with Consul
-// const consulClient = new Consul();
-const consulClient = new Consul({ host: '15.188.146.172', port: 8500 });
+// const consulClient = new Consul(); 
+const consulClient = new Consul({ host: consulIp, port: consulPort });
 consulClient.agent.service.register({
     name: 'WebSocket_Challenge',
-    address: '15.188.146.172',
-    port: 8500,
-    tags: ['nodejs', 'backend', 'websocket'],
+    address: 'host.docker.internal',
+    port: 1111,
+    tags: ['backend', 'websocket'],
     checks: [{
-        http: `http://host.docker.internal:${port}/health`,
-        interval: '10s'
+        http: `http://host.docker.internal:1111/api/status`,
+        interval: '5s'
     }]
 });
 
@@ -610,7 +615,7 @@ consulClient.agent.service.register({
 // run server
 
 server.listen(port, () => {
-    console.log('Serveur WebSocket écoutant sur le port ${port}');
+    console.log(`Serveur WebSocket écoutant sur le port ${port}`);
 });
 
 
