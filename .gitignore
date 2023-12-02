@@ -3,6 +3,9 @@ node_modules/
 logs/
 coverage/
 
+jest-html-reporters-attach/
+
+
 # Fichiers à ignorer
 *.log
 *.pid
@@ -10,6 +13,8 @@ coverage/
 *.sqlite
 *.db
 *.DS_Store
+
+*-report.html
 
 # Environnements spécifiques
 .env

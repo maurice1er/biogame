@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
@@ -62,22 +61,21 @@ const updateTopParticipants = async () => {
 
 
 
-
-
-const getRandomQuestions = async (language = 'fr', size = 1) => {
+const getRandomQuestions = async (lang = 'fr', size = 1) => {
     try {
         // Utilisation de l'agrégation avec $match pour filtrer par langue "fr" et $sample pour obtenir deux documents aléatoires
         const randomQuestions = await Question.aggregate([
-            { $match: { language: language } }, // Filtrer par langue "fr"
-            { $sample: { size: size } } // Changez la taille à 2 pour obtenir deux questions aléatoires
+            { $match: { language: lang } }, // Filtrer par langue "fr"
+            { $sample: { size: size } } //
         ]);
 
         return randomQuestions;
     } catch (error) {
-        console.error("Erreur lors de la récupération des questions aléatoires en français :", error);
-        throw error;
+        // console.error("Erreur lors de la récupération des questions aléatoires", error);
+        return [];
     }
 }
+
 
 const insertChallengeResponse = async (challengeId, participantId, questionId, response, isCorrect) => {
     try {
@@ -99,7 +97,7 @@ const insertChallengeResponse = async (challengeId, participantId, questionId, r
         const question = await Question.findById(questionId);
         if (!question) {
             console.log("Question not found");
-            return;
+            return null;
         }
 
         // Création de la réponse au challenge
@@ -115,7 +113,8 @@ const insertChallengeResponse = async (challengeId, participantId, questionId, r
         await challengeResponse.save();
         // console.log("Challenge response saved successfully");
     } catch (error) {
-        console.error("Error inserting into ChallengeResponse collection:", error);
+        // console.error("Error inserting into ChallengeResponse collection:", error);
+        return null;
     }
 }
 
@@ -136,8 +135,6 @@ const decodeJwtToken = async (tokenHeader, jwtSecret) => {
         // Vérifiez si la date d'expiration (exp) du token est supérieure à la date actuelle
         if (decoded.exp > currentTimestamp) {
             // Le token est valide, vous pouvez accéder aux informations du token
-            // console.log('Token JWT décodé :', decoded);
-
             return decoded;
         } else {
             // Le token JWT a expiré
@@ -152,68 +149,6 @@ const decodeJwtToken = async (tokenHeader, jwtSecret) => {
     }
 }
 
-
-/*
-const updateAvailableChallenges = async () => {
-    try {
-        // Effectuer la jointure et filtrer les challenges selon les critères
-        const challenges = await Challenge.aggregate([
-            {
-                $match: {
-                    is_ended: false,
-                    accepted_date: { $exists: false } // Assurez-vous que la date d'acceptation existe
-                }
-            },
-            {
-                $lookup: {
-                    from: 'participants',
-                    localField: 'challenger',
-                    foreignField: '_id',
-                    as: 'challenger_info',
-                },
-            },
-            // {
-            //     $group: {
-            //         _id: '$challenger',
-            //         id: { $first: '$_id' },
-            //         // challengerId: { $first: '$challenger' },
-            //         // challengerProfile: { $first: '$challenger_info.profile' },
-            //         // challengerUsername: { $first: '$challenger_info.username' },
-            //         // numberOfQuestions: { $sum: { $size: '$questions' } },
-            //     },
-            // },
-            // {
-            //     $sort: { numberOfQuestions: -1 } // Triez par nombre de questions du plus grand au plus petit
-            // }
-        ]);
-
-        // Attribuer le classement et le score aux challenges
-        const challengesWithRankAndScore = challenges.map((challenge, index) => {
-            return {
-                id: challenge.id,
-                challenger: updateTopParticipants( c => c.id == '$challenger_info.id'),
-                score: calculateScore(challenge)
-            };
-
-            // return {
-            //     id: challenge.id,
-            //     challengerId: challenge.challengerId,
-            //     challengerProfile: challenge.challengerProfile[0],
-            //     challengerUsername: challenge.challengerUsername[0],
-            //     numberOfQuestions: challenge.numberOfQuestions,
-            //     rank: index + 1, // Le classement commence à 1, pas à 0
-            //     score: calculateScore(challenge), // Calculez le score du participant (à implémenter)
-            //     numberOfChallenges: challenge.numberOfChallenges,
-            // };
-        });
-
-        return challengesWithRankAndScore;
-    } catch (error) {
-        console.error("Une erreur s'est produite :", error);
-        throw error;
-    }
-};
-*/
 
 const updateAvailableChallenges = async (challengerId) => {
     try {
@@ -265,8 +200,6 @@ const updateAvailableChallenges = async (challengerId) => {
         throw error;
     }
 };
-
-
 
 
 module.exports = {

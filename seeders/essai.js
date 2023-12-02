@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
-const { Participant, Challenge, ChallengeResponse, Score, Question } = require('../models');
+const { Participant, Challenge, ChallengeResponse, Score, Question } = require('../models.js');
 
 const dotenv = require('dotenv');
 dotenv.config();

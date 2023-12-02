@@ -1,5 +1,7 @@
 const WebSocket = require('ws');
 const http = require('http');
+const Consul = require('consul');
+
 // const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -558,6 +560,51 @@ server.on('upgrade', (request, socket, head) => {
 
 });
 
+
+
+
+// Health check endpoint for WebSocket
+server.on('/health', (req, res) => {
+    const isWebSocketHealthy = checkWebSocketHealth();
+  
+    // Renvoyer le statut approprié
+    const status = isWebSocketHealthy ? 200 : 500;
+  
+    res.writeHead(status, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'WebSocket Health', status: isWebSocketHealthy }));
+});
+  
+  // Vérification de l'état de santé du WebSocket
+  function checkWebSocketHealth() {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+
+    return new Promise((resolve) => {
+        ws.on('open', () => {
+            ws.close();
+            resolve(true);
+        });
+  
+        ws.on('error', (error) => {
+            ws.close();
+            resolve(false);
+        });
+    });
+}
+
+
+// Register service with Consul
+// const consulClient = new Consul();
+const consulClient = new Consul({ host: '15.188.146.172', port: 8500 });
+consulClient.agent.service.register({
+    name: 'WebSocket_Challenge',
+    address: '15.188.146.172',
+    port: 8500,
+    tags: ['nodejs', 'backend', 'websocket'],
+    checks: [{
+        http: `http://host.docker.internal:${port}/health`,
+        interval: '10s'
+    }]
+});
 
 
 // run server
