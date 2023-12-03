@@ -55,5 +55,5 @@ describe('decodeToken', () => {
     expect(result?.username).toEqual(data?.username);
     expect(result?.password).toEqual(data?.password);
   });
-  
+
 });
