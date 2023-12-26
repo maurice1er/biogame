@@ -48,16 +48,15 @@ jobs:
 
     - name: Delete Docker dangling image
       run: |
-        try {
-          touch myperm.pem
-          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-          chmod 600 myperm.pem
-          #ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'docker rmi $(sudo docker images -f "dangling=true" -q)'
-          ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'docker images -f "dangling=true" -q | xargs docker rmi'
-        } catch (error) {
+        touch myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+        chmod 600 myperm.pem
+        #ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'docker rmi $(sudo docker images -f "dangling=true" -q)'
+        if ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'docker images -f "dangling=true" -q | xargs docker rmi'; then
+          echo "Docker dangling images deleted successfully."
+        else
           echo "Error while deleting dangling images: $error"
           exit 1
-        }
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
