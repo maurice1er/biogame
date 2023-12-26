@@ -5,7 +5,6 @@ on:
     branches:
       - dev
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,7 +20,6 @@ jobs:
         ssh-keyscan -H ${{ secrets.LIGHTSAIL_PUBLIC_IP }} >> ~/.ssh/known_hosts
       env:
         LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-
 
     - name: Copy files to Lightsail instance
       run: |
@@ -49,11 +47,22 @@ jobs:
         APP_CONSUL_PORT: ${{ secrets.APP_CONSUL_PORT }}
 
 
-    - name: Build and Deploy Docker container on Lightsail
+    # - name: Kill old proccess on same port
+    #   run: |
+    #     touch myperm.pem
+    #     echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
+    #     chmod 600 myperm.pem
+    #     ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} "docker-compose down"
+    #   env:
+    #     LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+    #     LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+    #     LIGHTSAIL_PUBLIC_IP: ${{ secrets.LIGHTSAIL_PUBLIC_IP }}
+
+
+    - name: Build Docker container on Lightsail
       run: |
         touch myperm.pem
-        #echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
-        echo "$LIGHTSAIL_SSH_KEY" > myperm.pem
+        echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > myperm.pem
         chmod 600 myperm.pem
         ssh -i myperm.pem ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_PUBLIC_IP }} 'cd /home/bitnami/plantio/biogame && docker-compose down && docker-compose up -d --build'
       env:
@@ -64,5 +73,4 @@ jobs:
         APP_PORT: ${{ secrets.APP_PORT }}
         APP_RANDOM_QUESTIONS: ${{ secrets.APP_RANDOM_QUESTIONS }}
         APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
-
 
